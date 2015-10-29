@@ -1,0 +1,10 @@
+{ "namespace" : "avro.chat.proto",
+  "protocol" : "ChatClientServer",
+
+  "messages" : {
+    "register" : {
+      "request" : [{ "name" : "username", "type" : "string" }],
+      "response" : "string"
+    }
+  }
+}

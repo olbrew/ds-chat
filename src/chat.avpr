@@ -1,8 +1,8 @@
-{ "namespace" : "avro.hello.proto",
-  "protocol" : "Hello",
+{ "namespace" : "avro.chat.proto",
+  "protocol" : "Chat",
 
   "messages" : {
-    "sayHello" : {
+    "register" : {
       "request" : [{ "name" : "username", "type" : "string" }],
       "response" : "string"
     }
