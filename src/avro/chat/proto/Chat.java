@@ -8,12 +8,18 @@ package avro.chat.proto;
 @SuppressWarnings("all")
 @org.apache.avro.specific.AvroGenerated
 public interface Chat {
-  public static final org.apache.avro.Protocol PROTOCOL = org.apache.avro.Protocol.parse("{\"protocol\":\"Chat\",\"namespace\":\"avro.chat.proto\",\"types\":[],\"messages\":{\"register\":{\"request\":[{\"name\":\"username\",\"type\":\"string\"}],\"response\":\"string\"}}}");
-  java.lang.CharSequence register(java.lang.CharSequence username) throws org.apache.avro.AvroRemoteException;
+  public static final org.apache.avro.Protocol PROTOCOL = org.apache.avro.Protocol.parse("{\"protocol\":\"Chat\",\"namespace\":\"avro.chat.proto\",\"types\":[],\"messages\":{\"register\":{\"request\":[{\"name\":\"username\",\"type\":\"string\"},{\"name\":\"clientIP\",\"type\":\"string\"},{\"name\":\"clientPort\",\"type\":\"int\"}],\"response\":\"string\"},\"join\":{\"request\":[{\"name\":\"roomName\",\"type\":\"string\"}],\"response\":\"boolean\"},\"leave\":{\"request\":[],\"response\":\"null\"},\"sendMessage\":{\"request\":[{\"name\":\"username\",\"type\":\"string\"},{\"name\":\"message\",\"type\":\"string\"}],\"response\":\"null\"}}}");
+  java.lang.String register(java.lang.String username, java.lang.String clientIP, int clientPort) throws org.apache.avro.AvroRemoteException;
+  boolean join(java.lang.String roomName) throws org.apache.avro.AvroRemoteException;
+  java.lang.Void leave() throws org.apache.avro.AvroRemoteException;
+  java.lang.Void sendMessage(java.lang.String username, java.lang.String message) throws org.apache.avro.AvroRemoteException;
 
   @SuppressWarnings("all")
   public interface Callback extends Chat {
     public static final org.apache.avro.Protocol PROTOCOL = avro.chat.proto.Chat.PROTOCOL;
-    void register(java.lang.CharSequence username, org.apache.avro.ipc.Callback<java.lang.CharSequence> callback) throws java.io.IOException;
+    void register(java.lang.String username, java.lang.String clientIP, int clientPort, org.apache.avro.ipc.Callback<java.lang.CharSequence> callback) throws java.io.IOException;
+    void join(java.lang.String roomName, org.apache.avro.ipc.Callback<java.lang.Boolean> callback) throws java.io.IOException;
+    void leave(org.apache.avro.ipc.Callback<java.lang.Void> callback) throws java.io.IOException;
+    void sendMessage(java.lang.String username, java.lang.String message, org.apache.avro.ipc.Callback<java.lang.Void> callback) throws java.io.IOException;
   }
 }

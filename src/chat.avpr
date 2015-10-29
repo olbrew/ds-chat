@@ -3,8 +3,23 @@
 
   "messages" : {
     "register" : {
-      "request" : [{ "name" : "username", "type" : "string" }],
+      "request" : [{ "name" : "username", "type" : "string" }, 
+      			   { "name" : "clientIP", "type": "string"},
+      			   { "name" : "clientPort", "type": "int"}],
       "response" : "string"
+    },
+    "join" : {
+      "request" : [{ "name" : "roomName", "type" : "string" }],
+      "response" : "boolean"
+    },
+    "leave" : {
+      "request" : [],
+      "response" : "null"	
+    },
+    "sendMessage" : {
+      "request" : [{ "name" : "username", "type" : "string" },
+      			   { "name" : "message", "type" : "string" }],
+      "response" : "null"
     }
   }
 }

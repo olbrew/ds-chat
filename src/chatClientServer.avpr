@@ -2,7 +2,7 @@
   "protocol" : "ChatClientServer",
 
   "messages" : {
-    "register" : {
+    "test" : {
       "request" : [{ "name" : "username", "type" : "string" }],
       "response" : "string"
     }
