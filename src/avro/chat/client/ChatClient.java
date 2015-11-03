@@ -25,6 +25,7 @@ public class ChatClient {
 	public void startLocalServer() {
 		try {
 			clientPort += ports;
+			System.out.println(clientPort);
 			localServer = new SaslSocketServer(new SpecificResponder(Chat.class, new ChatServer()), new InetSocketAddress(clientPort));
 			ports++;
 		} catch(IOException e) {
@@ -60,6 +61,8 @@ public class ChatClient {
 			
 			String response = proxy.register("Bob", clientIP, cc.clientPort);
 			System.out.println(response);
+			
+			proxy.join("Public");
 			
 			cc.localServer.join();
 			client.close();

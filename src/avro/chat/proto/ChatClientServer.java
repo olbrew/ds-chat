@@ -8,7 +8,7 @@ package avro.chat.proto;
 @SuppressWarnings("all")
 @org.apache.avro.specific.AvroGenerated
 public interface ChatClientServer {
-  public static final org.apache.avro.Protocol PROTOCOL = org.apache.avro.Protocol.parse("{\"protocol\":\"ChatClientServer\",\"namespace\":\"avro.chat.proto\",\"types\":[],\"messages\":{\"test\":{\"request\":[{\"name\":\"username\",\"type\":\"string\"}],\"response\":\"string\"}}}");
+  public static final org.apache.avro.Protocol PROTOCOL = org.apache.avro.Protocol.parse("{\"protocol\":\"ChatClientServer\",\"namespace\":\"avro.chat.proto\",\"types\":[],\"messages\":{\"test\":{\"request\":[{\"name\":\"username\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"}}],\"response\":{\"type\":\"string\",\"avro.java.string\":\"String\"}}}}");
   java.lang.String test(java.lang.String username) throws org.apache.avro.AvroRemoteException;
 
   @SuppressWarnings("all")
