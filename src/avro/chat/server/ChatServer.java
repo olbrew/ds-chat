@@ -17,7 +17,7 @@ import avro.chat.proto.ChatClientServer;
 import util.Address;
 
 public class ChatServer implements Chat {
-	private ChatRoom publicRoom;
+	private ChatRoom publicRoom = new ChatRoom();
 	private Hashtable<String, ChatClientServer> clients = new Hashtable<String, ChatClientServer>();
 	
 	@Override
@@ -47,26 +47,28 @@ public class ChatServer implements Chat {
 	@Override
 	public boolean join(String roomName) throws AvroRemoteException {
 		if(roomName.equals("Public")) {
-			String username = "Bob";
+			CharSequence username = "Bob";
 			//ChatClientServer proxy = clients.get(username);
+			
 			publicRoom.join(username);
 			
 			System.out.println("You have successfully joined the Public chat room.");
 		}
-			
+
 		//TODO: join private room
 		return true;
 	}
 
 	@Override
 	public Void leave() throws AvroRemoteException {
-		// TODO Auto-generated method stub
+		publicRoom.leave("Bob");
+		System.out.println("You have successfully left the Public chat room.");
 		return null;
 	}
 
 	@Override
 	public Void sendMessage(String username, String message) throws AvroRemoteException {
-		// TODO Auto-generated method stub
+		publicRoom.sendMessage(username, message);
 		return null;
 	}
 	

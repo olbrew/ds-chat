@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 
 public class ChatRoom {
-	private ArrayList<CharSequence> clients;
-	private ArrayList<Hashtable<CharSequence, CharSequence>> messages;
+	private ArrayList<CharSequence> clients = new ArrayList<CharSequence>();
+	private ArrayList<Hashtable<CharSequence, CharSequence>> messages = new ArrayList<Hashtable<CharSequence, CharSequence>>();
 	
 	public boolean join(CharSequence username) {
 		if(!clients.contains(username)) {
@@ -25,5 +25,7 @@ public class ChatRoom {
 		Hashtable<CharSequence, CharSequence> userMessage = new Hashtable<CharSequence, CharSequence>();
 		userMessage.put(username, message);
 		messages.add(userMessage);
+		
+		System.out.println(username + ": " + message);
 	}
 }

@@ -1,6 +1,7 @@
 package avro.chat.client;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 
@@ -61,8 +62,10 @@ public class ChatClient {
 			
 			String response = proxy.register("Bob", clientIP, cc.clientPort);
 			System.out.println(response);
-			
+
 			proxy.join("Public");
+			proxy.sendMessage("Bob", "Hello World!");
+			proxy.leave();
 			
 			cc.localServer.join();
 			client.close();
