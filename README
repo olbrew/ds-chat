@@ -1,0 +1,7 @@
+First we can recompile the Avro schemas into Java code using the following commands:
+cd lib/
+java -jar avro-tools-1.7.7.jar compile -string protocol ../src/chat.avpr ../src/
+java -jar avro−tools−1.7.7.jar compile -string protocol ../src/chatClientServer.avpr ../src/
+
+Then we imported the whole project into Eclipse as an existing Java project 
+and run both avro.chat.server/Server and avro.chat.client/Client respectively.

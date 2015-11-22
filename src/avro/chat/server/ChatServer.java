@@ -2,7 +2,9 @@ package avro.chat.server;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.List;
 
 import org.apache.avro.AvroRemoteException;
 import org.apache.avro.ipc.SaslSocketServer;
@@ -14,63 +16,113 @@ import org.apache.avro.ipc.specific.SpecificResponder;
 
 import avro.chat.proto.Chat;
 import avro.chat.proto.ChatClientServer;
-import util.Address;
 
 public class ChatServer implements Chat {
 	private ChatRoom publicRoom = new ChatRoom();
 	private Hashtable<String, ChatClientServer> clients = new Hashtable<String, ChatClientServer>();
 	
 	@Override
-	public String register(String username, String clientIP, int clientPort) throws AvroRemoteException {
+	/***
+	 * Registers client's username to its local server proxy so we can communicate both ways.
+	 * 
+	 * @param username   The nickname of the client.
+	 * @param clientIP   The IP address of the client.
+	 * @param clientPort The port to which client's local server is bound to.
+	 * 
+	 * @return boolean Whether the client was successfully registered on the server. 
+	 */
+	public boolean register(String username, String clientIP, int clientPort) throws AvroRemoteException {
 		if (clients.get(username) == null) {
-			//Address address = new Address(clientIP, clientPort);
-			//clients.put(username, address);
-			
-			Transceiver transceiver;
 			try {
-				transceiver = new SaslSocketTransceiver(new InetSocketAddress(clientIP, clientPort));
+				Transceiver transceiver = new SaslSocketTransceiver(new InetSocketAddress(clientIP, clientPort));
 				ChatClientServer proxy = (ChatClientServer) SpecificRequestor.getClient(ChatClientServer.class, transceiver);
 				
 				clients.put(username, proxy);
 				System.out.println("Registered client with username: " + username);
 				
-				return "You're successfully registered with username: " + username;
+				return true;
 			} catch (IOException e1) {
 				System.err.println("Error: Couldn't connect back to the client.");
 				e1.printStackTrace();
 			}
+		} else {
+			System.err.println(username + " is already registered with the server.");
+			return true;
 		}
 		
-		return null;
+		return false;
 	}
 	
 	@Override
-	public boolean join(String roomName) throws AvroRemoteException {
-		if(roomName.equals("Public")) {
-			CharSequence username = "Bob";
+	/***
+	 * Gets the list of all client usernames that are connected to the server.
+	 * 
+	 * @return List<String> The list of usernames.
+	 */
+	public List<String> getClientList() throws AvroRemoteException {
+		List<String> clientList = new ArrayList<String>();
+		
+		for (String client : clients.keySet()) {
+			clientList.add(client);
+		}
+		
+		return clientList;
+	}
+	
+	@Override
+	/***
+	 * Allows a client to join a specific room.
+	 * 
+	 * @param username The nickname of the client.
+	 * @param roomName The name of the room, either a public chat room or a private room.
+	 * 
+	 * @return boolean Whether or not the client has successfully joined the room.
+	 */
+	public boolean join(String username, String roomName) throws AvroRemoteException {
+		if (roomName.equals("Public")) {
 			//ChatClientServer proxy = clients.get(username);
 			
-			publicRoom.join(username);
-			
-			System.out.println("You have successfully joined the Public chat room.");
+			if (publicRoom.join(username)) {
+				System.out.println("You have successfully joined the Public chat room.");
+				return true;
+			} else {
+				System.err.println("ERROR: You are already in the public room.");
+				return false;
+			}
 		}
 
 		//TODO: join private room
-		return true;
+		return false;
 	}
 
 	@Override
-	public Void leave() throws AvroRemoteException {
-		publicRoom.leave("Bob");
+	/***
+	 * Allows a client to leave the room.
+	 * 
+	 * @param username The nickname of the client.
+	 */
+	public Void leave(String username) throws AvroRemoteException {
+		//TODO: determine whether the client is in the public or private room for correct recipients.
+		
+		publicRoom.leave(username);
 		System.out.println("You have successfully left the Public chat room.");
 		return null;
 	}
 
 	@Override
+	/***
+	 * Allows a client to send a message to the room.
+	 * 
+	 * @param username The nickname of the client.
+	 * @param message  The message to be delivered.
+	 */
 	public Void sendMessage(String username, String message) throws AvroRemoteException {
+		//TODO: determine whether the client is in the public or private room for correct recipients.
+		
 		publicRoom.sendMessage(username, message);
 		return null;
 	}
+	
 	
 	public static void main(String[] args) {
 		Server server = null;
