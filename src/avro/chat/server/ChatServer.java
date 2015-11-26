@@ -129,7 +129,7 @@ public class ChatServer implements Chat {
 		ChatServer cs = new ChatServer();
 		
 		try {
-			server = new SaslSocketServer(new SpecificResponder(Chat.class, cs), new InetSocketAddress(10000));
+			server = new SaslSocketServer(new SpecificResponder(Chat.class, cs), new InetSocketAddress(10010));
 		
 			server.start();
 			server.join();

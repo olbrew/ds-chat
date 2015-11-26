@@ -39,7 +39,7 @@ public class ChatClient {
 	
 	public static void main(String[] args) {
 		String serverIP = "localhost";
-		int port = 10000;
+		int port = 10010;
 
 		if (args.length == 1) {
 			serverIP = "localhost";
