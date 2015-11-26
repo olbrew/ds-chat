@@ -1,0 +1,3 @@
+1. Cliche library toevoegen voor interactive chat
+2. Meerdere clients kunnen opstarten (unique user id voor clients)
+3. Architectuur uitleggen in manual
