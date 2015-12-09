@@ -40,6 +40,7 @@ public class ChatRoom {
 	 */
 	public void sendMessage(CharSequence username, CharSequence message) {
 		Hashtable<CharSequence, CharSequence> userMessage = new Hashtable<CharSequence, CharSequence>();
+		
 		userMessage.put(username, message);
 		messages.add(userMessage);
 		

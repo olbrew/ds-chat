@@ -35,8 +35,9 @@ public class ChatServer implements Chat {
 		if (clients.get(username) == null) {
 			try {
 				Transceiver transceiver = new SaslSocketTransceiver(new InetSocketAddress(clientIP, clientPort));
+				System.out.println("transceiver.getRemoteName(): " + transceiver.getRemoteName());
+				//TODO perhaps it's better to map client's username to Transceiver so we will be able to retrieve its remote address
 				ChatClientServer proxy = (ChatClientServer) SpecificRequestor.getClient(ChatClientServer.class, transceiver);
-				
 				clients.put(username, proxy);
 				System.out.println("Registered client with username: " + username);
 				
@@ -83,10 +84,10 @@ public class ChatServer implements Chat {
 			//ChatClientServer proxy = clients.get(username);
 			
 			if (publicRoom.join(username)) {
-				System.out.println("You have successfully joined the Public chat room.");
+				System.out.println(username + " has successfully joined the Public chat room.");
 				return true;
 			} else {
-				System.err.println("ERROR: You are already in the public room.");
+				System.err.println("ERROR: " + username + " is already in the public room.");
 				return false;
 			}
 		}
@@ -105,19 +106,19 @@ public class ChatServer implements Chat {
 		//TODO: determine whether the client is in the public or private room for correct recipients.
 		
 		publicRoom.leave(username);
-		System.out.println("You have successfully left the Public chat room.");
+		System.out.println(username + " has successfully left the Public chat room.");
 		return null;
 	}
 
 	@Override
 	/***
-	 * Allows a client to send a message to the room.
+	 * Allows a client to send a message to the public room.
 	 * 
 	 * @param username The nickname of the client.
 	 * @param message  The message to be delivered.
 	 */
 	public Void sendMessage(String username, String message) throws AvroRemoteException {
-		//TODO: determine whether the client is in the public or private room for correct recipients.
+		//TODO check if username exists or retrieve the username from other means such as the transceiver
 		
 		publicRoom.sendMessage(username, message);
 		return null;
@@ -128,8 +129,16 @@ public class ChatServer implements Chat {
 		Server server = null;
 		ChatServer cs = new ChatServer();
 		
+		int serverPort = 10010;
+		
+		if (args.length == 1) {
+			serverPort = Integer.parseInt(args[0]);
+		} else if (args.length > 1) {
+			System.err.println("ERROR: Max. 1 arguments ([server port]) expected.");
+		}
+		
 		try {
-			server = new SaslSocketServer(new SpecificResponder(Chat.class, cs), new InetSocketAddress(10010));
+			server = new SaslSocketServer(new SpecificResponder(Chat.class, cs), new InetSocketAddress(serverPort));
 		
 			server.start();
 			server.join();

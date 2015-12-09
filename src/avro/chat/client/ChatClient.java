@@ -5,6 +5,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.List;
 
+import org.apache.avro.AvroRemoteException;
 import org.apache.avro.ipc.SaslSocketServer;
 import org.apache.avro.ipc.SaslSocketTransceiver;
 import org.apache.avro.ipc.Server;
@@ -12,12 +13,14 @@ import org.apache.avro.ipc.Transceiver;
 import org.apache.avro.ipc.specific.SpecificRequestor;
 import org.apache.avro.ipc.specific.SpecificResponder;
 
+import asg.cliche.Command;
+import asg.cliche.ShellFactory;
+import asg.cliche.client.ClientUI;
 import avro.chat.proto.Chat;
 import avro.chat.server.ChatServer;
 
 public class ChatClient {
 	/** Fields **/
-	static Integer ports = 0;
 	Server localServer;
 	static String clientIP;
 	int clientPort = 11000;
@@ -25,10 +28,8 @@ public class ChatClient {
 	/** Methods **/
 	public void startLocalServer() {
 		try {
-			clientPort += ports;
 			System.out.println("Starting client's local server on port: " + clientPort);
 			localServer = new SaslSocketServer(new SpecificResponder(Chat.class, new ChatServer()), new InetSocketAddress(clientPort));
-			ports++;
 		} catch(IOException e) {
 			e.printStackTrace(System.err);
 			System.exit(1);
@@ -38,24 +39,27 @@ public class ChatClient {
 	}
 	
 	public static void main(String[] args) {
+		//TODO provide client's username once through arguments so it won't be able to impersonate others
+		//TODO provide client's ip address as argument so the server will be able to pass correct addresses for private rooms
 		String serverIP = "localhost";
-		int port = 10010;
-
-		if (args.length == 1) {
-			serverIP = "localhost";
-			port = Integer.parseInt(args[0]);
-		} else if (args.length == 2) {
-			serverIP = args[0];
-			port = Integer.parseInt(args[1]);
-		} else if (args.length > 2) {
-			System.err.println("ERROR: Max. 2 arguments ([ip-address,] port) exepected.");
-		}
-
-		ChatClient chatClient = new ChatClient();
-		chatClient.startLocalServer();
+		int serverPort = 10010;
 		
+		ChatClient chatClient = new ChatClient();
+		
+		if (args.length == 2) {
+			serverPort = Integer.parseInt(args[0]);
+			chatClient.clientPort = Integer.parseInt(args[1]);
+		} else if (args.length == 3) {
+			serverIP = args[0];
+			serverPort = Integer.parseInt(args[1]);
+			chatClient.clientPort = Integer.parseInt(args[2]);
+		} else if (args.length < 2 || args.length > 3) {
+			System.err.println("ERROR: Min. 2 and max. 3 arguments ([server ip-address,] server port, client port) expected.");
+		}
+		
+		chatClient.startLocalServer();
 		try {
-			Transceiver transceiver = new SaslSocketTransceiver(new InetSocketAddress(InetAddress.getByName(serverIP), port));
+			Transceiver transceiver = new SaslSocketTransceiver(new InetSocketAddress(InetAddress.getByName(serverIP), serverPort));
 			
 			Chat chatProxy = (Chat) SpecificRequestor.getClient(Chat.class, transceiver);
 			
@@ -65,16 +69,8 @@ public class ChatClient {
 			boolean response = chatProxy.register("Bob", clientIP, chatClient.clientPort);
 			System.out.println("The client has successfully registered to the server: " + response);
 
-			List<String> clients = chatProxy.getClientList();
-			System.out.println("Retrieving connected client list:");
-			for (String client : clients) {
-				System.out.println(client);
-			}
-			
-			chatProxy.join("Bob", "Public");
-			chatProxy.sendMessage("Bob", "Hello World!");
-			chatProxy.leave("Bob");
-			
+			ShellFactory.createConsoleShell("client", "", new ClientUI(chatProxy)).commandLoop();
+
 			chatClient.localServer.join();
 			transceiver.close();
 		} catch(InterruptedException e) {
