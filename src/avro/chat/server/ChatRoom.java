@@ -24,6 +24,21 @@ public class ChatRoom {
 	}
 	
 	/***
+	 * Check if the user is in the chatroom.
+	 * 
+	 * @param username The nickname of the user.
+	 * 
+	 * @return boolean Whether the room contains the user.
+	 */
+	public boolean contains(CharSequence username) {
+		if (!clients.contains(username)) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
+	/***
 	 * Disconnects the user from the public room.
 	 * 
 	 * @param username The nickname of the user.

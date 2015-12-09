@@ -39,22 +39,24 @@ public class ChatClient {
 	}
 	
 	public static void main(String[] args) {
-		//TODO provide client's username once through arguments so it won't be able to impersonate others
 		//TODO provide client's ip address as argument so the server will be able to pass correct addresses for private rooms
+		String username = "Bob";
 		String serverIP = "localhost";
 		int serverPort = 10010;
 		
 		ChatClient chatClient = new ChatClient();
 		
-		if (args.length == 2) {
-			serverPort = Integer.parseInt(args[0]);
-			chatClient.clientPort = Integer.parseInt(args[1]);
-		} else if (args.length == 3) {
-			serverIP = args[0];
+		if (args.length == 3) {
+			username = args[0];
 			serverPort = Integer.parseInt(args[1]);
 			chatClient.clientPort = Integer.parseInt(args[2]);
-		} else if (args.length < 2 || args.length > 3) {
-			System.err.println("ERROR: Min. 2 and max. 3 arguments ([server ip-address,] server port, client port) expected.");
+		} else if (args.length == 4) {
+			username = args[0];
+			serverIP = args[1];
+			serverPort = Integer.parseInt(args[2]);
+			chatClient.clientPort = Integer.parseInt(args[3]);
+		} else if (args.length < 3 || args.length > 4) {
+			System.err.println("ERROR: Min. 2 and max. 3 arguments (username, [server ip-address,] server port, client port) expected.");
 		}
 		
 		chatClient.startLocalServer();
@@ -66,10 +68,10 @@ public class ChatClient {
 			clientIP = InetAddress.getLocalHost().getHostAddress();
 			System.out.println("Client's ip: " + clientIP);
 			
-			boolean response = chatProxy.register("Bob", clientIP, chatClient.clientPort);
+			boolean response = chatProxy.register(username, clientIP, chatClient.clientPort);
 			System.out.println("The client has successfully registered to the server: " + response);
 
-			ShellFactory.createConsoleShell("client", "", new ClientUI(chatProxy)).commandLoop();
+			ShellFactory.createConsoleShell("client", "", new ClientUI(chatProxy, username)).commandLoop();
 
 			chatClient.localServer.join();
 			transceiver.close();

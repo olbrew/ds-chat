@@ -1,6 +1,7 @@
 package asg.cliche.client;
 
 import asg.cliche.Command;
+import asg.cliche.Param;
 import avro.chat.proto.Chat;
 
 import java.util.List;
@@ -8,13 +9,15 @@ import java.util.List;
 import org.apache.avro.AvroRemoteException;
 
 public class ClientUI {
+	private String username;
 	private Chat chatProxy = null;
 			
-	public ClientUI(Chat proxy) {
+	public ClientUI(Chat proxy, String user) {
 		chatProxy = proxy;
+		username = user;
 	}
 	
-    @Command
+    @Command(description="Prints list of users connected to the server.")
     public void getClientList() throws AvroRemoteException {
     	List<String> clients = chatProxy.getClientList();
     	
@@ -24,21 +27,27 @@ public class ClientUI {
 		}
     }
     
-    @Command
-    //TODO remove username argument, otherwise one could impersonate others
-    public boolean join(String user, String room) throws AvroRemoteException {
-        return chatProxy.join(user, room);
+    @Command(description="Initiates connection with the specified room.")
+    public void join(
+    		@Param(name="room", description="'Public' for public chat room else the name of the receiver for private conversation.")
+    			String room) throws AvroRemoteException {
+    	if (chatProxy.join(username, room)) {
+    		System.out.println("You succesfully joined chatroom " + room);
+    	} else {
+    		System.err.println("You failed to join chatroom " + room);
+    	}
+    }
+	
+    @Command(description="Terminates connection with the public/private room.")
+    public void leave() throws AvroRemoteException {
+        chatProxy.leave(username);
     }
     
-    @Command
-    //TODO remove username argument, otherwise one could impersonate others
-    public void leave(String user) throws AvroRemoteException {
-        chatProxy.leave(user);
-    }
-    
-    @Command
-    //TODO remove username argument, otherwise one could impersonate others
-    public void sendMessage(String user, String message) throws AvroRemoteException {
-        chatProxy.sendMessage(user, message);
+    @Command(description="Sends message to the connected room, if any.")
+    public void sendMessage (
+    		@Param(name="message", description="The message you would like to send.")
+    			String message) throws AvroRemoteException {
+        String output = chatProxy.sendMessage(username, message);
+        System.out.println(output);
     }
 }
