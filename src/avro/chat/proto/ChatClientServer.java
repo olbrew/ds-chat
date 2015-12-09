@@ -8,12 +8,12 @@ package avro.chat.proto;
 @SuppressWarnings("all")
 @org.apache.avro.specific.AvroGenerated
 public interface ChatClientServer {
-  public static final org.apache.avro.Protocol PROTOCOL = org.apache.avro.Protocol.parse("{\"protocol\":\"ChatClientServer\",\"namespace\":\"avro.chat.proto\",\"types\":[],\"messages\":{\"test\":{\"request\":[{\"name\":\"username\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"}}],\"response\":{\"type\":\"string\",\"avro.java.string\":\"String\"}}}}");
-  java.lang.String test(java.lang.String username) throws org.apache.avro.AvroRemoteException;
+  public static final org.apache.avro.Protocol PROTOCOL = org.apache.avro.Protocol.parse("{\"protocol\":\"ChatClientServer\",\"namespace\":\"avro.chat.proto\",\"types\":[],\"messages\":{\"test\":{\"request\":[],\"response\":\"boolean\"}}}");
+  boolean test() throws org.apache.avro.AvroRemoteException;
 
   @SuppressWarnings("all")
   public interface Callback extends ChatClientServer {
     public static final org.apache.avro.Protocol PROTOCOL = avro.chat.proto.ChatClientServer.PROTOCOL;
-    void test(java.lang.String username, org.apache.avro.ipc.Callback<java.lang.String> callback) throws java.io.IOException;
+    void test(org.apache.avro.ipc.Callback<java.lang.Boolean> callback) throws java.io.IOException;
   }
 }

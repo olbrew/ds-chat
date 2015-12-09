@@ -3,8 +3,8 @@
 
   "messages" : {
     "test" : {
-      "request" : [{ "name" : "username", "type" : "string" }],
-      "response" : "string"
+      "request" : [],
+      "response" : "boolean"
     }
   }
 }
