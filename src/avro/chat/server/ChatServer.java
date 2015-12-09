@@ -1,6 +1,8 @@
 package avro.chat.server;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -19,7 +21,7 @@ import avro.chat.proto.ChatClientServer;
 
 public class ChatServer implements Chat {
 	private ChatRoom publicRoom = new ChatRoom();
-	private Hashtable<String, ChatClientServer> clients = new Hashtable<String, ChatClientServer>();
+	private Hashtable<String, Transceiver> clients = new Hashtable<String, Transceiver>();
 
 	@Override
 	/***
@@ -39,13 +41,12 @@ public class ChatServer implements Chat {
 	public boolean register(String username, String clientIP, int clientPort) throws AvroRemoteException {
 		if (clients.get(username) == null) {
 			try {
-				Transceiver transceiver = new SaslSocketTransceiver(new InetSocketAddress(clientIP, clientPort));
+				Transceiver transceiver = new SaslSocketTransceiver(new InetSocketAddress(InetAddress.getByName(clientIP), clientPort));
 				System.out.println("transceiver.getRemoteName(): " + transceiver.getRemoteName());
-				// TODO perhaps it's better to map client's username to
-				// Transceiver so we will be able to retrieve its remote address
-				ChatClientServer proxy = (ChatClientServer) SpecificRequestor.getClient(ChatClientServer.class,
-						transceiver);
-				clients.put(username, proxy);
+				
+				//ChatClientServer proxy = (ChatClientServer) SpecificRequestor.getClient(ChatClientServer.class, transceiver);
+				
+				clients.put(username, transceiver);
 				System.out.println("Registered client with username: " + username);
 
 				return true;
@@ -71,6 +72,23 @@ public class ChatServer implements Chat {
 		List<String> clientList = new ArrayList<String>();
 
 		for (String client : clients.keySet()) {
+			Transceiver transceiver = clients.get(client);
+			//System.out.println(client + " is connected: " + transceiver.isConnected());
+			
+			try {
+				ChatClientServer proxy = (ChatClientServer) SpecificRequestor.getClient(ChatClientServer.class, transceiver);
+				
+				System.out.println("Found following methods of client's local server proxy object:");
+				for (Method m : proxy.getClass().getMethods()) {
+					System.out.println(m.getName());	
+				}
+				
+				//TODO test whether client is still alive, if not, update the client list
+				//boolean result = proxy.test();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			
 			clientList.add(client);
 		}
 
@@ -133,9 +151,6 @@ public class ChatServer implements Chat {
 	 *            The message to be delivered.
 	 */
 	public String sendMessage(String username, String message) throws AvroRemoteException {
-		// TODO check if username exists or retrieve the username from other
-		// means such as the transceiver
-
 		if (publicRoom.contains(username)) {
 			String error = "You have not joined the public chatroom yet. "
 					+ "To join type: `join 'Public'`";
