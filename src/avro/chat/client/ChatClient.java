@@ -20,26 +20,42 @@ import avro.chat.proto.ChatClientServer;
 public class ChatClient implements ChatClientServer {
 	/** Fields **/
 	Server localServer;
-	static String clientIP = "127.0.0.1";
-	int clientPort = 11000;
 
 	String username;
+	static String clientIP = "127.0.0.1";
+	int clientPort;
+
 	String serverIP;
 	int serverPort;
 
 	/** Proxy methods **/
+	/***
+	 * Simple method which can only return if the client is still alive.
+	 * 
+	 * @return boolean Whether the client is still alive.
+	 */
 	@Override
 	public boolean isAlive() throws AvroRemoteException {
 		return true;
 	}
-	
+
+	/***
+	 * Prints out the incoming message.
+	 * 
+	 * @param message
+	 *            Content of the incoming message.
+	 */
 	@Override
 	public Void incomingMessage(String message) throws AvroRemoteException {
 		System.out.println(message);
 		return null;
 	}
-	
+
 	/** Methods **/
+	/***
+	 * Starts a server for the client, so the client can also receive commands
+	 * from other servers and clients.
+	 */
 	public void startLocalServer() {
 		try {
 			localServer = new SaslSocketServer(new SpecificResponder(ChatClientServer.class, new ChatClient()),
@@ -52,30 +68,43 @@ public class ChatClient implements ChatClientServer {
 		localServer.start();
 	}
 
+	/***
+	 * Reads in the command line arguments to configure the client, or uses
+	 * defaults if none are given.
+	 * 
+	 * @param args
+	 *            The given command line arguments.
+	 */
 	public void configure(String[] args) {
 		// default values, override with command-line arguments
-		username = "Bob";
-		serverIP = "127.0.0.1";
-		serverPort = 10010;
 
 		// parse command line arguments
-		if (args.length == 4) {
+		if (args.length == 0) {
+			username = "Bob";
+			serverIP = "127.0.0.1";
+			serverPort = 10010;
+			clientPort = 11000;
+		} else if (args.length == 4) {
 			username = args[0];
 			serverIP = args[1];
 			serverPort = Integer.parseInt(args[2]);
-			this.clientPort = Integer.parseInt(args[3]);
+			clientPort = Integer.parseInt(args[3]);
 		} else if (args.length == 5) {
 			username = args[0];
 			serverIP = args[1];
 			serverPort = Integer.parseInt(args[2]);
 			clientIP = args[3];
-			this.clientPort = Integer.parseInt(args[4]);
+			clientPort = Integer.parseInt(args[4]);
 		} else if (args.length < 4 || args.length > 5) {
 			System.err.println(
 					"ERROR: Min. 4 and max. 5 arguments (username, server ip-address, server port, [client ip-address,] client port) expected.");
 		}
 	}
 
+	/***
+	 * Registers with the server, start the Cliche CLI and keep the connection
+	 * open until the client exits or the server is down for more than 60s.
+	 */
 	public void connectToServer() {
 		try {
 			Transceiver transceiver = new SaslSocketTransceiver(
