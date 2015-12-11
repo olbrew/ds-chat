@@ -1,0 +1,1 @@
+* We use a `HashTable` instead of a `HashMap` because it's synchronized so we can use it in a threaded evironment. See [here](http://stackoverflow.com/questions/40471/differences-between-hashmap-and-hashtable).
