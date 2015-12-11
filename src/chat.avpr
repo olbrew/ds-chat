@@ -25,6 +25,10 @@
     "leave" : {
       "request" : [{ "name" : "username", "type" : "string" }],
       "response" : "null"	
+    },
+    "exit" : {
+      "request" : [{ "name" : "username", "type" : "string" }],
+      "response" : "null"
     }
   }
 }

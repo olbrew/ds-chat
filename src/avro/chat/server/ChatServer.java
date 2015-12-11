@@ -32,16 +32,16 @@ public class ChatServer implements Chat {
 	 *            The nickname of the client.
 	 * @param clientIP
 	 *            The IP address of the client.
-	 * @param clientPort
+	 * @param clientServerPort
 	 *            The port to which client's local server is bound to.
 	 * 
 	 * @return boolean Whether the client was successfully registered on the
 	 *         server.
 	 */
-	public boolean register(String username, String clientIP, int clientPort) throws AvroRemoteException {
+	public boolean register(String username, String clientIP, int clientServerPort) throws AvroRemoteException {
 		if (clients.get(username) == null) {
 			try {
-				Transceiver transceiver = new SaslSocketTransceiver(new InetSocketAddress(InetAddress.getByName(clientIP), clientPort));
+				Transceiver transceiver = new SaslSocketTransceiver(new InetSocketAddress(InetAddress.getByName(clientIP), clientServerPort));
 				System.out.println("transceiver.getRemoteName(): " + transceiver.getRemoteName());
 				
 				//ChatClientServer proxy = (ChatClientServer) SpecificRequestor.getClient(ChatClientServer.class, transceiver);
@@ -68,30 +68,9 @@ public class ChatServer implements Chat {
 	 * 
 	 * @return List<String> The list of usernames.
 	 */
-	public List<String> getClientList() throws AvroRemoteException {
-		List<String> clientList = new ArrayList<String>();
-
-		for (String client : clients.keySet()) {
-			Transceiver transceiver = clients.get(client);
-			//System.out.println(client + " is connected: " + transceiver.isConnected());
-			
-			try {
-				ChatClientServer proxy = (ChatClientServer) SpecificRequestor.getClient(ChatClientServer.class, transceiver);
-				
-				System.out.println("Found following methods of client's local server proxy object:");
-				for (Method m : proxy.getClass().getMethods()) {
-					System.out.println(m.getName());	
-				}
-				
-				//TODO test whether client is still alive, if not, update the client list
-				//boolean result = proxy.test();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			
-			clientList.add(client);
-		}
-
+	public ArrayList<String> getClientList() throws AvroRemoteException {
+		ArrayList<String> clientList = new ArrayList<String>();
+		clientList.addAll(clients.keySet());
 		return clientList;
 	}
 
@@ -138,6 +117,20 @@ public class ChatServer implements Chat {
 
 		publicRoom.leave(username);
 		System.out.println(username + " has successfully left the Public chat room.");
+		return null;
+	}
+	
+	@Override
+	/***
+	 * Allows a client to exit the server.
+	 * 
+	 * @param username
+	 *            The nickname of the client.
+	 */
+	public Void exit(String username) throws AvroRemoteException {
+		leave(username);
+		clients.remove(username);
+		System.out.println(username + " has exited the server.");
 		return null;
 	}
 

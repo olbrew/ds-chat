@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 
+import org.apache.avro.AvroRemoteException;
 import org.apache.avro.ipc.SaslSocketServer;
 import org.apache.avro.ipc.SaslSocketTransceiver;
 import org.apache.avro.ipc.Server;
@@ -15,7 +16,6 @@ import asg.cliche.ShellFactory;
 import asg.cliche.client.ClientUI;
 import avro.chat.proto.Chat;
 import avro.chat.proto.ChatClientServer;
-import avro.chat.server.ChatServer;
 
 public class ChatClient implements ChatClientServer {
 	/** Fields **/
@@ -25,7 +25,7 @@ public class ChatClient implements ChatClientServer {
 
 	/** Proxy methods **/
 	@Override
-	public boolean test() {
+	public boolean test() throws AvroRemoteException {
 		return true;
 	}
 	
@@ -33,7 +33,7 @@ public class ChatClient implements ChatClientServer {
 	public void startLocalServer() {
 		try {
 			System.out.println("Starting client's local server on port: " + clientPort);
-			localServer = new SaslSocketServer(new SpecificResponder(Chat.class, new ChatServer()), new InetSocketAddress(clientPort));
+			localServer = new SaslSocketServer(new SpecificResponder(ChatClientServer.class, new ChatClient()), new InetSocketAddress(clientPort));
 		} catch(IOException e) {
 			e.printStackTrace(System.err);
 			System.exit(1);
@@ -79,14 +79,12 @@ public class ChatClient implements ChatClientServer {
 
 			ShellFactory.createConsoleShell("client", "", new ClientUI(chatProxy, username)).commandLoop();
 			
-			chatClient.localServer.join();
+			chatProxy.exit(username);
 			transceiver.close();
 		} catch(IOException e) {
 			System.err.println("Error connecting to server ...");
 			e.printStackTrace(System.err);
 			System.exit(1);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
 		}
 	}
 }
