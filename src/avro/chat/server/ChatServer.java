@@ -190,6 +190,7 @@ public class ChatServer implements Chat {
 
 			server.start();
 
+			//TODO checkUsers in a separate thread to allow server.join() run simultaneously
 			long lastCall = 0;
 			while (true) {
 				if (System.currentTimeMillis() - lastCall > 1000) {
@@ -197,7 +198,8 @@ public class ChatServer implements Chat {
 					cs.checkUsers();
 				}
 			}
-			// server.join();
+			//server.join();
+			//server.close();
 		} catch (IOException e) {
 			e.printStackTrace(System.err);
 			System.exit(1);
