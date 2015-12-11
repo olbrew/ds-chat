@@ -79,11 +79,27 @@ public class ChatClient implements ChatClientServer {
 		// default values, override with command-line arguments
 
 		// parse command line arguments
-		if (args.length == 1) {
+		if (args.length == 0) {
 			username = "Bob";
 			serverIP = "127.0.0.1";
 			serverPort = 10010;
 			clientPort = 11000;
+		} else if (args.length == 1) {
+			System.out.println("Usage: ant ChatClient [args]");
+			System.out.println("----------------------------");
+			System.out.println(
+					"0 arguments use our defaults: username = Bob, server ip-address = 127.0.0.1, server port = 10010, client ip-address = 127.0.0.1, client port = 11000");
+			System.out.println("2 arguments => username, client port. Rest uses defaults.");
+			System.out.println(
+					"4 arguments => username, server ip-address, server port, client port. Rest uses defaults.");
+			System.out.println(
+					"5 arguments => username, server ip-address, server port, client ip-address, client port.");
+			System.exit(0);
+		} else if (args.length == 2) {
+			username = args[0];
+			serverIP = "127.0.0.1";
+			serverPort = 10010;
+			clientPort = Integer.parseInt(args[1]);
 		} else if (args.length == 4) {
 			username = args[0];
 			serverIP = args[1];
@@ -96,8 +112,7 @@ public class ChatClient implements ChatClientServer {
 			clientIP = args[3];
 			clientPort = Integer.parseInt(args[4]);
 		} else {
-			System.err.println(
-					"ERROR: 0 arguments uses the defaults, otherwise use min. 4 or max. 5 arguments (username, server ip-address, server port, [client ip-address,] client port).");
+			System.err.println("ERROR: Invalid argument[s]. Try `ant ChatClient help` to see your options.");
 		}
 	}
 
