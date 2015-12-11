@@ -136,5 +136,6 @@ public class ChatClient implements ChatClientServer {
 		chatClient.configure(args);
 		chatClient.startLocalServer();
 		chatClient.connectToServer();
+		chatClient.localServer.close();
 	}
 }
