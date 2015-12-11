@@ -79,7 +79,7 @@ public class ChatClient implements ChatClientServer {
 		// default values, override with command-line arguments
 
 		// parse command line arguments
-		if (args.length == 0) {
+		if (args.length == 1) {
 			username = "Bob";
 			serverIP = "127.0.0.1";
 			serverPort = 10010;
@@ -95,9 +95,9 @@ public class ChatClient implements ChatClientServer {
 			serverPort = Integer.parseInt(args[2]);
 			clientIP = args[3];
 			clientPort = Integer.parseInt(args[4]);
-		} else if (args.length < 4 || args.length > 5) {
+		} else {
 			System.err.println(
-					"ERROR: Min. 4 and max. 5 arguments (username, server ip-address, server port, [client ip-address,] client port) expected.");
+					"ERROR: 0 arguments uses the defaults, otherwise use min. 4 or max. 5 arguments (username, server ip-address, server port, [client ip-address,] client port).");
 		}
 	}
 
