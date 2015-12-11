@@ -40,7 +40,11 @@ public class ClientUI {
 	
     @Command(description="Terminates connection with the public/private room.")
     public void leave() throws AvroRemoteException {
-        chatProxy.leave(username);
+        if (chatProxy.leave(username)) {
+			System.out.println("You have left the Public chat room.");
+		} else {
+			System.err.println("You couldn't leave the Public chat room.");
+        }
     }
     
     @Command(description="Sends message to the connected room, if any.")

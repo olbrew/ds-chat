@@ -106,13 +106,18 @@ public class ChatServer implements Chat {
 	 * @param username
 	 *            The nickname of the client.
 	 */
-	public Void leave(String userName) throws AvroRemoteException {
+	public boolean leave(String userName) throws AvroRemoteException {
 		// TODO: determine whether the client is in the public or private room
 		// for correct recipients.
 
 		publicRoom.leave(userName);
-		System.out.println(userName + " has left the Public chat room.");
-		return null;
+		if (!publicRoom.contains(userName)) {
+			System.out.println(userName + " has left the Public chat room.");
+			return true;
+		} else {
+			System.err.println(userName + " couldn't leave the Public chat room.");
+			return false;
+		}
 	}
 
 	@Override

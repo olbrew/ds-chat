@@ -31,7 +31,7 @@ public class ChatRoom {
 	 * @return boolean Whether the room contains the user.
 	 */
 	public boolean contains(CharSequence username) {
-		if (!clients.contains(username)) {
+		if (clients.contains(username)) {
 			return true;
 		} else {
 			return false;
