@@ -1,12 +1,10 @@
 package avro.chat.server;
 
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Hashtable;
-import java.util.List;
 
 import org.apache.avro.AvroRemoteException;
 import org.apache.avro.ipc.SaslSocketServer;
@@ -22,6 +20,7 @@ import avro.chat.proto.ChatClientServer;
 public class ChatServer implements Chat {
 	private ChatRoom publicRoom = new ChatRoom();
 	private Hashtable<String, Transceiver> clients = new Hashtable<String, Transceiver>();
+	private Hashtable<String, ChatClientServer> clientsServer = new Hashtable<String, ChatClientServer>();
 
 	@Override
 	/***
@@ -39,27 +38,26 @@ public class ChatServer implements Chat {
 	 *         server.
 	 */
 	public boolean register(String username, String clientIP, int clientServerPort) throws AvroRemoteException {
-		if (clients.get(username) == null) {
-			try {
-				Transceiver transceiver = new SaslSocketTransceiver(new InetSocketAddress(InetAddress.getByName(clientIP), clientServerPort));
-				System.out.println("transceiver.getRemoteName(): " + transceiver.getRemoteName());
-				
-				//ChatClientServer proxy = (ChatClientServer) SpecificRequestor.getClient(ChatClientServer.class, transceiver);
-				
+		try {
+			Transceiver transceiver = new SaslSocketTransceiver(
+					new InetSocketAddress(InetAddress.getByName(clientIP), clientServerPort));
+			ChatClientServer proxy = (ChatClientServer) SpecificRequestor.getClient(ChatClientServer.class,
+					transceiver);
+
+			if (!clients.containsKey(username)) {
 				clients.put(username, transceiver);
+				clientsServer.put(username, proxy);
 				System.out.println("Registered client with username: " + username);
-
 				return true;
-			} catch (IOException e1) {
-				System.err.println("Error: Couldn't connect back to the client.");
-				e1.printStackTrace();
+			} else {
+				System.err.println(username + " is already registered with the server.");
+				return false;
 			}
-		} else {
-			System.err.println(username + " is already registered with the server.");
-			return true;
+		} catch (IOException e1) {
+			System.err.println("Error: Couldn't connect back to the client.");
+			e1.printStackTrace();
+			return false;
 		}
-
-		return false;
 	}
 
 	@Override
@@ -89,8 +87,6 @@ public class ChatServer implements Chat {
 	 */
 	public boolean join(String username, String roomName) throws AvroRemoteException {
 		if (roomName.equals("Public")) {
-			// ChatClientServer proxy = clients.get(username);
-
 			if (publicRoom.join(username)) {
 				System.out.println(username + " has successfully joined the Public chat room.");
 				return true;
@@ -99,7 +95,6 @@ public class ChatServer implements Chat {
 				return false;
 			}
 		}
-
 		// TODO: join private room
 		return false;
 	}
@@ -111,15 +106,15 @@ public class ChatServer implements Chat {
 	 * @param username
 	 *            The nickname of the client.
 	 */
-	public Void leave(String username) throws AvroRemoteException {
+	public Void leave(String userName) throws AvroRemoteException {
 		// TODO: determine whether the client is in the public or private room
 		// for correct recipients.
 
-		publicRoom.leave(username);
-		System.out.println(username + " has successfully left the Public chat room.");
+		publicRoom.leave(userName);
+		System.out.println(userName + " has left the Public chat room.");
 		return null;
 	}
-	
+
 	@Override
 	/***
 	 * Allows a client to exit the server.
@@ -127,10 +122,11 @@ public class ChatServer implements Chat {
 	 * @param username
 	 *            The nickname of the client.
 	 */
-	public Void exit(String username) throws AvroRemoteException {
-		leave(username);
-		clients.remove(username);
-		System.out.println(username + " has exited the server.");
+	public Void exit(String userName) throws AvroRemoteException {
+		leave(userName);
+		clients.remove(userName);
+		clientsServer.remove(userName);
+		System.out.println(userName + " has exited the server.");
 		return null;
 	}
 
@@ -145,12 +141,19 @@ public class ChatServer implements Chat {
 	 */
 	public String sendMessage(String username, String message) throws AvroRemoteException {
 		if (publicRoom.contains(username)) {
-			String error = "You have not joined the public chatroom yet. "
-					+ "To join type: `join 'Public'`";
+			String error = "You have not joined the public chatroom yet. " + "To join type: `join 'Public'`";
 			return error;
 		} else {
 			publicRoom.sendMessage(username, message);
 			return message;
+		}
+	}
+
+	public void checkUsers() throws IOException {
+		for (String client : clientsServer.keySet()) {
+			if (!(clientsServer.get(client)).isAlive()) {
+				exit(client);
+			}
 		}
 	}
 
@@ -170,11 +173,18 @@ public class ChatServer implements Chat {
 			server = new SaslSocketServer(new SpecificResponder(Chat.class, cs), new InetSocketAddress(serverPort));
 
 			server.start();
-			server.join();
+
+			long lastCall = 0;
+			while (true) {
+				if (System.currentTimeMillis() - lastCall > 1000) {
+					lastCall = System.currentTimeMillis();
+					cs.checkUsers();
+				}
+			}
+			// server.join();
 		} catch (IOException e) {
 			e.printStackTrace(System.err);
 			System.exit(1);
-		} catch (InterruptedException e) {
 		}
 	}
 }

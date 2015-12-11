@@ -25,7 +25,7 @@ public class ChatClient implements ChatClientServer {
 
 	/** Proxy methods **/
 	@Override
-	public boolean test() throws AvroRemoteException {
+	public boolean isAlive() throws AvroRemoteException {
 		return true;
 	}
 	
@@ -74,7 +74,8 @@ public class ChatClient implements ChatClientServer {
 			if (chatProxy.register(username, clientIP, chatClient.clientPort)) {
 				System.out.println("You are successfully registered to the server.");
 			} else {
-				System.out.println("Something went wrong when registering with the server.");
+				System.out.println("Something went wrong when registering with the server."
+						+ "Maybe you've already registered.");
 			}
 
 			ShellFactory.createConsoleShell("client", "", new ClientUI(chatProxy, username)).commandLoop();

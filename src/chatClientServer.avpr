@@ -2,7 +2,7 @@
   "protocol" : "ChatClientServer",
 
   "messages" : {
-    "test" : {
+    "isAlive" : {
       "request" : [],
       "response" : "boolean"
     }
