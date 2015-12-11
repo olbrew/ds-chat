@@ -4,7 +4,7 @@
   "messages" : {
     "isAlive" : {
       "request" : [],
-      "response" : "boolean"
+      "response" : "null"
     },
     "incomingMessage" : {
       "request" : [{"name" : "message", "type" : "string"}],
