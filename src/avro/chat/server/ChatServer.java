@@ -17,7 +17,7 @@ import org.apache.avro.ipc.specific.SpecificResponder;
 import avro.chat.proto.Chat;
 import avro.chat.proto.ChatClientServer;
 
-public class ChatServer implements Chat {
+public class ChatServer implements Chat, Runnable {
 	private ChatRoom publicRoom = new ChatRoom();
 	private Hashtable<String, Transceiver> clients = new Hashtable<String, Transceiver>();
 	private Hashtable<String, ChatClientServer> clientsServer = new Hashtable<String, ChatClientServer>();
@@ -166,22 +166,45 @@ public class ChatServer implements Chat {
 	}
 
 	/***
-	 * Checks if all connected users are still alive.
-	 * If not manually exits them from the server.
+	 * Checks if all connected users are still alive. If not manually exits them
+	 * from the server.
+	 * 
+	 * @throws AvroRemoteException
 	 */
-	public void checkUsers() throws IOException {
-		for (String client : clientsServer.keySet()) {
-			if (!(clientsServer.get(client)).isAlive()) {
+	public void checkUsers() throws AvroRemoteException {
+		Hashtable<String, Transceiver> clientsCopy = new Hashtable<String, Transceiver>(clients);
+
+		for (String client : clientsCopy.keySet()) {
+			try {
+				clientsServer.get(client).isAlive();
+			} catch (AvroRemoteException e) {
 				exit(client);
 			}
 		}
 	}
 
+	@Override
+	public void run() {
+		try {
+			while (true) {
+				checkUsers();
+				Thread.sleep(1000); // milliseconds
+			}
+		} catch (InterruptedException e) {
+			// This thread was interrupted, it needs to stop doing what it was
+			// trying to do
+			e.printStackTrace();
+		} catch (AvroRemoteException e) {
+			System.err.println("Server couldn't exit client after the client crashed.");
+			e.printStackTrace();
+		}
+	}
+
 	public static void main(String[] args) {
 		Server server = null;
-		ChatServer cs = new ChatServer();
-
 		int serverPort = 10010;
+
+		ChatServer cs = new ChatServer();
 
 		if (args.length == 1) {
 			serverPort = Integer.parseInt(args[0]);
@@ -191,22 +214,19 @@ public class ChatServer implements Chat {
 
 		try {
 			server = new SaslSocketServer(new SpecificResponder(Chat.class, cs), new InetSocketAddress(serverPort));
-
 			server.start();
 
-			//TODO checkUsers in a separate thread to allow server.join() run simultaneously
-			long lastCall = 0;
-			while (true) {
-				if (System.currentTimeMillis() - lastCall > 1000) {
-					lastCall = System.currentTimeMillis();
-					cs.checkUsers();
-				}
-			}
-			//server.join();
-			//server.close();
+			Thread t = new Thread(cs);
+			t.start();
+			t.join();
+
+			server.join();
+			server.close();
 		} catch (IOException e) {
 			e.printStackTrace(System.err);
 			System.exit(1);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
 		}
 	}
 }
