@@ -128,7 +128,10 @@ public class ChatServer implements Chat, Runnable {
 	 *            The nickname of the client.
 	 */
 	public Void exit(String userName) throws AvroRemoteException {
-		leave(userName);
+		if (publicRoom.contains(userName)) {
+			leave(userName);
+		}
+		
 		clients.remove(userName);
 		clientsServer.remove(userName);
 		System.out.println(userName + " has exited the server.");

@@ -30,13 +30,11 @@ public class ChatClient implements ChatClientServer {
 
 	/** Proxy methods **/
 	/***
-	 * Simple method which can only return if the client is still alive.
-	 * 
-	 * @return boolean Whether the client is still alive.
+	 * Simple method to test if the client is still alive.
 	 */
 	@Override
-	public boolean isAlive() throws AvroRemoteException {
-		return true;
+	public Void isAlive() throws AvroRemoteException {
+		return null;
 	}
 
 	/***
