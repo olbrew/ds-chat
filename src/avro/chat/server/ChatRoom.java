@@ -49,6 +49,7 @@ public class ChatRoom {
 	
 	/***
 	 * Logs a message of the user.
+	 * Must be used after join(username).
 	 * 
 	 * @param username The nickname of the user.
 	 * @param message  The message of the user.

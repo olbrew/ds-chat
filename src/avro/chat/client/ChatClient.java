@@ -29,6 +29,12 @@ public class ChatClient implements ChatClientServer {
 		return true;
 	}
 	
+	@Override
+	public Void incomingMessage(String message) throws AvroRemoteException {
+		System.out.println(message);
+		return null;
+	}
+	
 	/** Methods **/
 	public void startLocalServer() {
 		try {

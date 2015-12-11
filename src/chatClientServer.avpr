@@ -5,6 +5,10 @@
     "isAlive" : {
       "request" : [],
       "response" : "boolean"
+    },
+    "incomingMessage" : {
+      "request" : [{"name" : "message", "type" : "string"}],
+      "response" : "null"
     }
   }
 }

@@ -144,13 +144,24 @@ public class ChatServer implements Chat {
 	 * @param message
 	 *            The message to be delivered.
 	 */
-	public String sendMessage(String username, String message) throws AvroRemoteException {
-		if (publicRoom.contains(username)) {
+	public String sendMessage(String userName, String message) throws AvroRemoteException {
+		if (!publicRoom.contains(userName)) {
 			String error = "You have not joined the public chatroom yet. " + "To join type: `join 'Public'`";
 			return error;
 		} else {
-			publicRoom.sendMessage(username, message);
-			return message;
+			publicRoom.sendMessage(userName, message);
+			
+			// send the message to all other clients
+			String output = userName + ": " + message;
+			for (String client : clients.keySet()) {
+				if (publicRoom.contains(client)) {
+					if (!client.equals(userName)) {
+						(clientsServer.get(client)).incomingMessage(output);
+					}
+				}
+			}
+			
+			return output;
 		}
 	}
 
