@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 
 public class ChatRoom {
-	private ArrayList<CharSequence> clients = new ArrayList<CharSequence>();
-	private ArrayList<Hashtable<CharSequence, CharSequence>> messages = new ArrayList<Hashtable<CharSequence, CharSequence>>();
+	private ArrayList<String> clients = new ArrayList<String>();
+	private ArrayList<Hashtable<String, String>> messages = new ArrayList<Hashtable<String, String>>();
 
 	/***
 	 * Connects the user to the public room if he is not connected yet.
@@ -15,7 +15,7 @@ public class ChatRoom {
 	 * 
 	 * @return boolean Whether the user was added to the room or not.
 	 */
-	public boolean join(CharSequence username) {
+	public boolean join(String username) {
 		if (!clients.contains(username)) {
 			clients.add(username);
 			return true;
@@ -32,7 +32,7 @@ public class ChatRoom {
 	 * 
 	 * @return boolean Whether the room contains the user.
 	 */
-	public boolean contains(CharSequence username) {
+	public boolean contains(String username) {
 		if (clients.contains(username)) {
 			return true;
 		} else {
@@ -46,7 +46,7 @@ public class ChatRoom {
 	 * @param username
 	 *            The nickname of the user.
 	 */
-	public void leave(CharSequence username) {
+	public void leave(String username) {
 		clients.remove(username);
 	}
 
@@ -58,8 +58,8 @@ public class ChatRoom {
 	 * @param message
 	 *            The message of the user.
 	 */
-	public void sendMessage(CharSequence username, CharSequence message) {
-		Hashtable<CharSequence, CharSequence> userMessage = new Hashtable<CharSequence, CharSequence>();
+	public void sendMessage(String username, String message) {
+		Hashtable<String, String> userMessage = new Hashtable<String, String>();
 
 		userMessage.put(username, message);
 		messages.add(userMessage);
