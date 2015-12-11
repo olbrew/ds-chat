@@ -150,7 +150,7 @@ public class ChatServer implements Chat {
 			return error;
 		} else {
 			publicRoom.sendMessage(userName, message);
-			
+
 			// send the message to all other clients
 			String output = userName + ": " + message;
 			for (String client : clients.keySet()) {
@@ -160,11 +160,15 @@ public class ChatServer implements Chat {
 					}
 				}
 			}
-			
+
 			return output;
 		}
 	}
 
+	/***
+	 * Checks if all connected users are still alive.
+	 * If not manually exits them from the server.
+	 */
 	public void checkUsers() throws IOException {
 		for (String client : clientsServer.keySet()) {
 			if (!(clientsServer.get(client)).isAlive()) {
