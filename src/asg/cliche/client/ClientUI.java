@@ -43,7 +43,7 @@ public class ClientUI {
 		if (chatProxy.leave(username)) {
 			System.out.println("You have left the Public chat room.");
 		} else {
-			System.err.println("You couldn't leave the Public chat room.");
+			System.err.println("You couldn't leave the Public chat room, maybe you never joined it.");
 		}
 	}
 

@@ -10,7 +10,7 @@ INSTALL
 
         cd lib/
         java -jar avro-tools-1.7.7.jar compile -string protocol ../src/chat.avpr ../src/
-        java -jar avro−tools−1.7.7.jar compile -string protocol ../src/chatClientServer.avpr ../src/
+        java -jar avro-tools-1.7.7.jar compile -string protocol ../src/chatClientServer.avpr ../src/
 
 1. Import the project in Eclipse as an existing Java project.
 
@@ -23,7 +23,7 @@ INSTALL
 
         cd lib/
         java -jar avro-tools-1.7.7.jar compile -string protocol ../src/chat.avpr ../src/
-        java -jar avro−tools−1.7.7.jar compile -string protocol ../src/chatClientServer.avpr ../src/
+        java -jar avro-tools-1.7.7.jar compile -string protocol ../src/chatClientServer.avpr ../src/
 
 1. Compile the java code
 

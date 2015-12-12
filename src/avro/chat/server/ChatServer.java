@@ -101,21 +101,24 @@ public class ChatServer implements Chat, Runnable {
 
 	@Override
 	/***
-	 * Allows a client to leave the room.
+	 * Allows a client to leave the public chat room.
 	 * 
 	 * @param username
 	 *            The nickname of the client.
 	 */
 	public boolean leave(String userName) throws AvroRemoteException {
-		// TODO: determine whether the client is in the public or private room
-		// for correct recipients.
-
-		publicRoom.leave(userName);
-		if (!publicRoom.contains(userName)) {
-			System.out.println(userName + " has left the Public chat room.");
-			return true;
+		// if the user is in a private room, the disconnection happens outside the server
+		if (publicRoom.contains(userName)) {
+			publicRoom.leave(userName);
+			
+			if (!publicRoom.contains(userName)) {
+				System.out.println(userName + " has left the Public chat room.");
+				return true;
+			} else {
+				System.err.println(userName + " couldn't leave the Public chat room.");
+				return false;
+			}
 		} else {
-			System.err.println(userName + " couldn't leave the Public chat room.");
 			return false;
 		}
 	}
@@ -128,10 +131,7 @@ public class ChatServer implements Chat, Runnable {
 	 *            The nickname of the client.
 	 */
 	public Void exit(String userName) throws AvroRemoteException {
-		if (publicRoom.contains(userName)) {
-			leave(userName);
-		}
-		
+		leave(userName);
 		clients.remove(userName);
 		clientsServer.remove(userName);
 		System.out.println(userName + " has exited the server.");
