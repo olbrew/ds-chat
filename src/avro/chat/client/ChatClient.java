@@ -58,9 +58,9 @@ public class ChatClient implements ChatClientServer {
 		try {
 			localServer = new SaslSocketServer(new SpecificResponder(ChatClientServer.class, new ChatClient()),
 					new InetSocketAddress(clientPort));
-			System.out.println("Starting client's local server on port: " + clientPort);
+			System.out.println("Starting client's local server on " + clientIP + ":" + clientPort);
 		} catch (IOException e) {
-			e.printStackTrace(System.err);
+			System.err.println("ERROR: Starting local server for client. Double check local-ip and local-port.");
 			System.exit(1);
 		}
 		localServer.start();
@@ -111,6 +111,14 @@ public class ChatClient implements ChatClientServer {
 			clientPort = Integer.parseInt(args[4]);
 		} else {
 			System.err.println("ERROR: Invalid argument[s]. Try `ant ChatClient help` to see your options.");
+			System.exit(1);
+		}
+		
+		if (serverPort == clientPort) {
+			if (serverIP.equals(clientIP)) {
+				System.err.println("ERROR: Server and client's local server's addresses must be different.");
+				System.exit(1);
+			}
 		}
 	}
 
@@ -122,14 +130,14 @@ public class ChatClient implements ChatClientServer {
 		try {
 			Transceiver transceiver = new SaslSocketTransceiver(
 					new InetSocketAddress(InetAddress.getByName(serverIP), serverPort));
+
 			Chat chatProxy = (Chat) SpecificRequestor.getClient(Chat.class, transceiver);
-			System.out.println("Client's ip: " + clientIP);
 
 			if (chatProxy.register(username, clientIP, clientPort)) {
 				System.out.println("You are successfully registered to the server.");
 			} else {
 				System.out.println(
-						"Something went wrong when registering with the server." + "Maybe you've already registered.");
+						"Something went wrong when registering with the server." + " Maybe you've already registered.");
 			}
 
 			ShellFactory.createConsoleShell("client", "", new ClientUI(chatProxy, username)).commandLoop();
@@ -137,8 +145,7 @@ public class ChatClient implements ChatClientServer {
 			chatProxy.exit(username);
 			transceiver.close();
 		} catch (IOException e) {
-			System.err.println("Error connecting to server ...");
-			e.printStackTrace(System.err);
+			System.err.println("ERROR: Unknown remote host. Double check server-ip and server-port.");
 			System.exit(1);
 		}
 	}

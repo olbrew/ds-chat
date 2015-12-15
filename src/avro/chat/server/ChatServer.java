@@ -54,8 +54,7 @@ public class ChatServer implements Chat, Runnable {
 				return false;
 			}
 		} catch (IOException e1) {
-			System.err.println("Error: Couldn't connect back to the client.");
-			e1.printStackTrace();
+			System.err.println("ERROR: Couldn't connect back to the client on: " + clientIP + ":" + clientServerPort);
 			return false;
 		}
 	}
@@ -107,10 +106,11 @@ public class ChatServer implements Chat, Runnable {
 	 *            The nickname of the client.
 	 */
 	public boolean leave(String userName) throws AvroRemoteException {
-		// if the user is in a private room, the disconnection happens outside the server
+		// if the user is in a private room, the disconnection happens outside
+		// the server
 		if (publicRoom.contains(userName)) {
 			publicRoom.leave(userName);
-			
+
 			if (!publicRoom.contains(userName)) {
 				System.out.println(userName + " has left the Public chat room.");
 				return true;
@@ -181,6 +181,7 @@ public class ChatServer implements Chat, Runnable {
 			try {
 				clientsServer.get(client).isAlive();
 			} catch (AvroRemoteException e) {
+				System.out.println("Failed to reconnect to " + client + ", dropping connection.");
 				exit(client);
 			}
 		}
@@ -226,7 +227,7 @@ public class ChatServer implements Chat, Runnable {
 			server.join();
 			server.close();
 		} catch (IOException e) {
-			e.printStackTrace(System.err);
+			System.err.println("ERROR: Starting server. Double check server-ip and server-port.");
 			System.exit(1);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
