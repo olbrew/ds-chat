@@ -19,14 +19,14 @@ import avro.chat.proto.ChatClientServer;
 
 public class ChatClient implements ChatClientServer {
 	/** Fields **/
-	Server localServer;
-
 	String username;
-	static String clientIP = "127.0.0.1";
-	int clientPort;
 
 	String serverIP;
 	int serverPort;
+	
+	static String clientIP = "127.0.0.1";
+	int clientPort;
+	Server localServer;
 
 	/** Proxy methods **/
 	/***
@@ -113,7 +113,7 @@ public class ChatClient implements ChatClientServer {
 			System.err.println("ERROR: Invalid argument[s]. Try `ant ChatClient help` to see your options.");
 			System.exit(1);
 		}
-		
+
 		if (serverPort == clientPort) {
 			if (serverIP.equals(clientIP)) {
 				System.err.println("ERROR: Server and client's local server's addresses must be different.");
@@ -152,11 +152,17 @@ public class ChatClient implements ChatClientServer {
 	}
 
 	public static void main(String[] args) {
-		ChatClient chatClient = new ChatClient();
+		try {
+			ChatClient chatClient = new ChatClient();
 
-		chatClient.configure(args);
-		chatClient.startLocalServer();
-		chatClient.connectToServer();
-		chatClient.localServer.close();
+			chatClient.configure(args);
+			chatClient.startLocalServer();
+			chatClient.connectToServer();
+			chatClient.localServer.close();
+		} catch (Exception e) {
+			// Client was abruptly terminated (for instance by pressing CTRL + D
+			// in terminal after cliche interface was constructed).
+			System.exit(1);
+		}
 	}
 }
