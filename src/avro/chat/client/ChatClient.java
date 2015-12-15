@@ -138,6 +138,7 @@ public class ChatClient implements ChatClientServer {
 			} else {
 				System.out.println(
 						"Something went wrong when registering with the server." + " Maybe you've already registered.");
+				System.exit(1);
 			}
 
 			ShellFactory.createConsoleShell("client", "", new ClientUI(chatProxy, username)).commandLoop();
