@@ -15,7 +15,7 @@
     "join" : {
       "request" : [{ "name" : "username", "type" : "string" },
       			   { "name" : "roomName", "type" : "string" }],
-      "response" : "boolean"
+      "response" : "string"
     },
     "sendMessage" : {
       "request" : [{ "name" : "username", "type" : "string" },

@@ -36,6 +36,8 @@ public class ChatServer implements Chat, Runnable {
 	 * 
 	 * @return boolean Whether the client was successfully registered on the
 	 *         server.
+	 * 
+	 * @throws AvroRemoteException
 	 */
 	public boolean register(String username, String clientIP, int clientServerPort) throws AvroRemoteException {
 		try {
@@ -64,6 +66,8 @@ public class ChatServer implements Chat, Runnable {
 	 * Gets the list of all client usernames that are connected to the server.
 	 * 
 	 * @return List<String> The list of usernames.
+	 * 
+	 * @throws AvroRemoteException
 	 */
 	public ArrayList<String> getClientList() throws AvroRemoteException {
 		ArrayList<String> clientList = new ArrayList<String>();
@@ -83,19 +87,59 @@ public class ChatServer implements Chat, Runnable {
 	 * 
 	 * @return boolean Whether or not the client has successfully joined the
 	 *         room.
+	 * 
+	 * @throws AvroRemoteException
 	 */
-	public boolean join(String username, String roomName) throws AvroRemoteException {
+	public String join(String username, String roomName) throws AvroRemoteException {
+		String output;
+		if (username == roomName) {
+			output = "You can just talk to yourself, " + "you don't need our chat for that ;)";
+			return output;
+		}
+		// public room
 		if (roomName.equals("Public")) {
 			if (publicRoom.join(username)) {
-				System.out.println(username + " has successfully joined the Public chat room.");
-				return true;
+				output = username + " has successfully joined the Public chat room.";
+				System.out.println(output);
+				return output;
 			} else {
-				System.err.println("ERROR: " + username + " is already in the public room.");
-				return false;
+				output = username + " is already in the public room.";
+				System.err.println(output);
+				return output;
+			}
+			// private chat
+		} else {
+			String request = username + " would like to start a private conversation witth you. "
+					+ "You will be disconnected from all your current chats if you accept.";
+			if (clientsServer.get(roomName).sendRequest(request)) {
+				if (clients.containsKey(roomName)) {
+					if (publicRoom.contains(username)) {
+						leave(username);
+					}
+					if (publicRoom.contains(roomName)) {
+						leave(roomName);
+					}
+					// set up actual connection here
+					if (setupConnection(username, roomName)) {
+						output = "You are disconnected from all other chats. You can now chat privately with"
+								+ roomName;
+						return output;
+
+					} else {
+						output = roomName + "has accepted your invitation,";
+						return output;
+					}
+
+				} else {
+					output = roomName + "has not accepted your invitation.";
+					return output;
+				}
+			} else {
+				output = roomName + " is not connected to the server right now.";
+				System.err.println(output);
+				return output;
 			}
 		}
-		// TODO: join private room
-		return false;
 	}
 
 	@Override
@@ -104,6 +148,8 @@ public class ChatServer implements Chat, Runnable {
 	 * 
 	 * @param username
 	 *            The nickname of the client.
+	 * 
+	 * @throws AvroRemoteException
 	 */
 	public boolean leave(String userName) throws AvroRemoteException {
 		// if the user is in a private room, the disconnection happens outside
@@ -129,6 +175,8 @@ public class ChatServer implements Chat, Runnable {
 	 * 
 	 * @param username
 	 *            The nickname of the client.
+	 * 
+	 * @throws AvroRemoteException
 	 */
 	public Void exit(String userName) throws AvroRemoteException {
 		leave(userName);
@@ -146,6 +194,8 @@ public class ChatServer implements Chat, Runnable {
 	 *            The nickname of the client.
 	 * @param message
 	 *            The message to be delivered.
+	 * 
+	 * @throws AvroRemoteException
 	 */
 	public String sendMessage(String userName, String message) throws AvroRemoteException {
 		if (!publicRoom.contains(userName)) {
@@ -163,7 +213,6 @@ public class ChatServer implements Chat, Runnable {
 					}
 				}
 			}
-
 			return output;
 		}
 	}
@@ -185,6 +234,21 @@ public class ChatServer implements Chat, Runnable {
 				exit(client);
 			}
 		}
+	}
+
+	/***
+	 * Set up the connection between two clients for a private chat.
+	 * 
+	 * @param client1
+	 *            The nickname of the first client.
+	 * @param client2
+	 *            The nickname of the second client.
+	 * 
+	 * @return boolean Whether or not the connection was successfully made.
+	 */
+	private boolean setupConnection(String client1, String client2) {
+		// TODO set up the actual connection :)
+		return true;
 	}
 
 	@Override

@@ -29,13 +29,10 @@ public class ClientUI {
 
 	@Command(description = "Initiates connection with the specified room.")
 	public void join(
-			@Param(name = "room", description = "'Public' for public chat room else the name of the receiver for private conversation.") String room)
+			@Param(name = "room", description = "'Public' for the public chat room or the name of the receiver you want to start a private conversation with.") String room)
 					throws AvroRemoteException {
-		if (chatProxy.join(username, room)) {
-			System.out.println("You succesfully joined chatroom " + room);
-		} else {
-			System.err.println("You failed to join chatroom " + room);
-		}
+		String output = chatProxy.join(username, room);
+		System.out.println(output);
 	}
 
 	@Command(description = "Terminates connection with the public/private room.")
@@ -54,4 +51,5 @@ public class ClientUI {
 		String output = chatProxy.sendMessage(username, message);
 		System.out.println(output);
 	}
+
 }

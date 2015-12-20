@@ -3,6 +3,7 @@ package avro.chat.client;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.util.Scanner;
 
 import org.apache.avro.AvroRemoteException;
 import org.apache.avro.ipc.SaslSocketServer;
@@ -23,8 +24,8 @@ public class ChatClient implements ChatClientServer {
 
 	String serverIP;
 	int serverPort;
-	
-	static String clientIP = "127.0.0.1";
+
+	static String clientIP = "127.0.0.1"; // TODO this shouldn't be hardcoded
 	int clientPort;
 	Server localServer;
 
@@ -47,6 +48,27 @@ public class ChatClient implements ChatClientServer {
 	public Void incomingMessage(String message) throws AvroRemoteException {
 		System.out.println(message);
 		return null;
+	}
+
+	/***
+	 * Prints out the incoming message.
+	 * 
+	 * @param message
+	 *            Content of the request message.
+	 * 
+	 * @return boolean Binary client answer to the request
+	 */
+	@Override
+	public boolean sendRequest(String message) throws AvroRemoteException {
+		Scanner reader = new Scanner(System.in);
+		System.out.println("Type 'y' to accept or 'n' to decline.");
+		if (reader.hasNext("y")) {
+			reader.close();
+			return true;
+		} else {
+			reader.close();
+			return false;
+		}
 	}
 
 	/** Methods **/

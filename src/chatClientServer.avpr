@@ -9,6 +9,10 @@
     "incomingMessage" : {
       "request" : [{"name" : "message", "type" : "string"}],
       "response" : "null"
+    },
+    "sendRequest" : {
+      "request" : [{"name" : "message", "type" : "string"}],
+      "response" : "boolean"
     }
   }
 }
