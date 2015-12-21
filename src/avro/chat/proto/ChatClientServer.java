@@ -8,11 +8,15 @@ package avro.chat.proto;
 @SuppressWarnings("all")
 @org.apache.avro.specific.AvroGenerated
 public interface ChatClientServer {
-  public static final org.apache.avro.Protocol PROTOCOL = org.apache.avro.Protocol.parse("{\"protocol\":\"ChatClientServer\",\"namespace\":\"avro.chat.proto\",\"types\":[],\"messages\":{\"isAlive\":{\"request\":[],\"response\":\"null\"},\"incomingMessage\":{\"request\":[{\"name\":\"message\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"}}],\"response\":\"null\"},\"sendRequest\":{\"request\":[{\"name\":\"message\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"}}],\"response\":\"boolean\"},\"sendVideoRequest\":{\"request\":[{\"name\":\"message\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"}},{\"name\":\"file\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"}}],\"response\":\"boolean\"}}}");
+  public static final org.apache.avro.Protocol PROTOCOL = org.apache.avro.Protocol.parse("{\"protocol\":\"ChatClientServer\",\"namespace\":\"avro.chat.proto\",\"types\":[],\"messages\":{\"isAlive\":{\"request\":[],\"response\":\"null\"},\"incomingMessage\":{\"request\":[{\"name\":\"message\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"}}],\"response\":\"null\"},\"sendRequest\":{\"request\":[{\"name\":\"message\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"}}],\"response\":\"boolean\"},\"sendVideoRequest\":{\"request\":[{\"name\":\"message\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"}},{\"name\":\"file\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"}}],\"response\":\"boolean\"},\"connectToClient\":{\"request\":[{\"name\":\"privateName\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"}},{\"name\":\"privateIP\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"}}],\"response\":\"boolean\"},\"register\":{\"request\":[{\"name\":\"username\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"}},{\"name\":\"clientIP\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"}},{\"name\":\"clientPort\",\"type\":\"int\"}],\"response\":\"boolean\"},\"sendMessage\":{\"request\":[{\"name\":\"username\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"}},{\"name\":\"message\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"}}],\"response\":{\"type\":\"string\",\"avro.java.string\":\"String\"}},\"exit\":{\"request\":[{\"name\":\"username\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"}}],\"response\":\"null\"}}}");
   java.lang.Void isAlive() throws org.apache.avro.AvroRemoteException;
   java.lang.Void incomingMessage(java.lang.String message) throws org.apache.avro.AvroRemoteException;
   boolean sendRequest(java.lang.String message) throws org.apache.avro.AvroRemoteException;
   boolean sendVideoRequest(java.lang.String message, java.lang.String file) throws org.apache.avro.AvroRemoteException;
+  boolean connectToClient(java.lang.String privateName, java.lang.String privateIP) throws org.apache.avro.AvroRemoteException;
+  boolean register(java.lang.String username, java.lang.String clientIP, int clientPort) throws org.apache.avro.AvroRemoteException;
+  java.lang.String sendMessage(java.lang.String username, java.lang.String message) throws org.apache.avro.AvroRemoteException;
+  java.lang.Void exit(java.lang.String username) throws org.apache.avro.AvroRemoteException;
 
   @SuppressWarnings("all")
   public interface Callback extends ChatClientServer {
@@ -21,5 +25,9 @@ public interface ChatClientServer {
     void incomingMessage(java.lang.String message, org.apache.avro.ipc.Callback<java.lang.Void> callback) throws java.io.IOException;
     void sendRequest(java.lang.String message, org.apache.avro.ipc.Callback<java.lang.Boolean> callback) throws java.io.IOException;
     void sendVideoRequest(java.lang.String message, java.lang.String file, org.apache.avro.ipc.Callback<java.lang.Boolean> callback) throws java.io.IOException;
+    void connectToClient(java.lang.String privateName, java.lang.String privateIP, org.apache.avro.ipc.Callback<java.lang.Boolean> callback) throws java.io.IOException;
+    void register(java.lang.String username, java.lang.String clientIP, int clientPort, org.apache.avro.ipc.Callback<java.lang.Boolean> callback) throws java.io.IOException;
+    void sendMessage(java.lang.String username, java.lang.String message, org.apache.avro.ipc.Callback<java.lang.String> callback) throws java.io.IOException;
+    void exit(java.lang.String username, org.apache.avro.ipc.Callback<java.lang.Void> callback) throws java.io.IOException;
   }
 }

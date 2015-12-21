@@ -18,6 +18,26 @@
       "request" : [{"name" : "message", "type" : "string"},
 				   {"name" : "file", "type" : "string"}],
       "response" : "boolean"
+    },
+    "connectToClient" : {
+      "request" : [{ "name" : "privateName", "type" : "string" },
+				   {"name" : "privateIP", "type" : "string"}],
+      "response" : "boolean"
+    },
+    "register" : {
+      "request" : [{ "name" : "username", "type" : "string" }, 
+      			   { "name" : "clientIP", "type": "string"},
+      			   { "name" : "clientPort", "type": "int"}],
+      "response" : "boolean"
+    },
+    "sendMessage" : {
+      "request" : [{ "name" : "username", "type" : "string" },
+      			   { "name" : "message", "type" : "string" }],
+      "response" : "string"
+    },
+    "exit" : {
+      "request" : [{ "name" : "username", "type" : "string" }],
+      "response" : "null"
     }
   }
 }

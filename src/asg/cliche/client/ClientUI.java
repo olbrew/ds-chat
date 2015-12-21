@@ -13,7 +13,8 @@ public class ClientUI {
 	private String username;
 	private Chat chatProxy = null;
 	private ChatClientServer chatClientProxy = null;
-	//TODO set ChatClientServer proxies for both clients once private room is initialized, remove it once someone disconnects / crashes
+	// TODO set ChatClientServer proxies for both clients once private room is
+	// initialized, remove it once someone disconnects / crashes
 
 	public ClientUI(Chat proxy, String user) {
 		chatProxy = proxy;
@@ -30,18 +31,21 @@ public class ClientUI {
 		}
 	}
 
-	@Command(description = "Initiates connection with the specified room.")
+	@Command(description = "Initiates connection specified room or user.")
 	public void join(
 			@Param(name = "room", description = "'Public' for the public chat room or the name of the receiver you want to start a private conversation with.") String room)
 					throws AvroRemoteException {
-		//TODO determine if the client is already in a private room to use correct proxy to join the (public) chatroom and consequently leave the old one
+		// TODO determine if the client is already in a private room to use
+		// correct proxy to join the (public) chatroom and consequently leave
+		// the old one
 		String output = chatProxy.join(username, room);
 		System.out.println(output);
 	}
 
 	@Command(description = "Terminates connection with the public/private room.")
 	public void leave() throws AvroRemoteException {
-		//TODO determine if the client is already in a private room to use correct proxy to leave the room
+		// TODO determine if the client is already in a private room to use
+		// correct proxy to leave the room
 		if (chatProxy.leave(username)) {
 			System.out.println("You have left the Public chat room.");
 		} else {
@@ -53,16 +57,17 @@ public class ClientUI {
 	public void sendMessage(
 			@Param(name = "message", description = "The message you would like to send.") String message)
 					throws AvroRemoteException {
-		//TODO determine if the client is already in a private room to use correct proxy to send a message
+		// TODO determine if the client is already in a private room to use
+		// correct proxy to send a message
 		String output = chatProxy.sendMessage(username, message);
 		System.out.println(output);
 	}
 
 	@Command(description = "Tries to initiate videostreaming with help of RSVP.")
-	public void video(
-			@Param(name = "file", description = "The filename of the video to be transmitted.") String file)
-					throws AvroRemoteException {
-		//TODO determine if the client is already in a private room before requesting videostreaming
+	public void video(@Param(name = "file", description = "The filename of the video to be transmitted.") String file)
+			throws AvroRemoteException {
+		// TODO determine if the client is already in a private room before
+		// requesting videostreaming
 		boolean isInPrivateRoom = false;
 
 		if (isInPrivateRoom) {
@@ -71,7 +76,7 @@ public class ClientUI {
 			boolean response = chatClientProxy.sendVideoRequest(request, file);
 
 			if (response) {
-				//TODO trigger rsvp.send_path handler
+				// TODO trigger rsvp.send_path handler
 				String output = "The client has accepted your videostreaming request, sending RSVP PATH message.";
 				System.out.println(output);
 			} else {
@@ -80,7 +85,7 @@ public class ClientUI {
 			}
 		} else {
 			String output = "You are currently not part of any private rooms."
-			 + " Use `join username` before initiating videostream.";
+					+ " Use `join username` before initiating videostream.";
 			System.err.println(output);
 		}
 	}
