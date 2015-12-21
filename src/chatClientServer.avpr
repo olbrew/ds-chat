@@ -13,6 +13,11 @@
     "sendRequest" : {
       "request" : [{"name" : "message", "type" : "string"}],
       "response" : "boolean"
+    },
+    "sendVideoRequest" : {
+      "request" : [{"name" : "message", "type" : "string"},
+				   {"name" : "file", "type" : "string"}],
+      "response" : "boolean"
     }
   }
 }

@@ -71,6 +71,31 @@ public class ChatClient implements ChatClientServer {
 		}
 	}
 
+	/***
+	 * Allows videostreaming to be intitiated between two clients.
+	 * 
+	 * @param message
+	 *            Content of the request message.
+	 * @param file
+	 *            The video file to be transmitted.
+	 * 
+	 * @return boolean Binary client answer to the request
+	 */
+	@Override
+	public boolean sendVideoRequest(String message, String file) throws AvroRemoteException {
+		System.out.println(message);
+
+		Scanner reader = new Scanner(System.in);
+		System.out.println("Type 'y' to accept or 'n' to decline.");
+		if (reader.hasNext("y")) {
+			reader.close();
+			return true;
+		} else {
+			reader.close();
+			return false;
+		}
+	}
+
 	/** Methods **/
 	/***
 	 * Starts a server for the client, so the client can also receive commands
