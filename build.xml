@@ -17,6 +17,7 @@
         <pathelement location="lib/slf4j-api-1.7.7.jar"/>
         <pathelement location="lib/slf4j-simple-1.7.7.jar"/>
         <pathelement location="lib/asg.cliche-110413.jar"/>
+        <pathelement location="lib/xuggle-xuggler-5.4.jar"/>
     </path>
     <target name="init">
         <mkdir dir="bin"/>
