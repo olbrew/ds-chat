@@ -33,11 +33,11 @@ INSTALL
 2. Start your server on port 10010 for example
 
         cd bin/
-        java -classpath ".:../lib/avro-1.7.7.jar:../lib/avro-ipc-1.7.7.jar:../lib/jackson-core-asl-1.9.13.jar:../lib/jackson-mapper-asl-1.9.13.jar:../lib/slf4j-api-1.7.7.jar:../lib/slf4j-simple-1.7.7.jar:../lib/asg.cliche-110413.jar" avro.chat.server.ChatServer 10010
+        java -classpath ".:../lib/avro-1.7.7.jar:../lib/avro-ipc-1.7.7.jar:../lib/jackson-core-asl-1.9.13.jar:../lib/jackson-mapper-asl-1.9.13.jar:../lib/slf4j-api-1.7.7.jar:../lib/slf4j-simple-1.7.7.jar:../lib/asg.cliche-110413.jar" avro/chat/server/ChatServer 10010
 
 3. Start as many clients as you want. Use `help` for possible arguments.
 
-        java -classpath ".:../lib/avro-1.7.7.jar:../lib/avro-ipc-1.7.7.jar:../lib/jackson-core-asl-1.9.13.jar:../lib/jackson-mapper-asl-1.9.13.jar:../lib/slf4j-api-1.7.7.jar:../lib/slf4j-simple-1.7.7.jar:../lib/asg.cliche-110413.jar" avro.chat.client.ChatClient help
+        java -classpath ".:../lib/avro-1.7.7.jar:../lib/avro-ipc-1.7.7.jar:../lib/jackson-core-asl-1.9.13.jar:../lib/jackson-mapper-asl-1.9.13.jar:../lib/slf4j-api-1.7.7.jar:../lib/slf4j-simple-1.7.7.jar:../lib/asg.cliche-110413.jar" avro/chat/client/ChatClient help
 
 AUTHORS
 -------
