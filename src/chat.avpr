@@ -3,7 +3,7 @@
 
   "messages" : {
     "register" : {
-      "request" : [{ "name" : "username", "type" : "string" }, 
+      "request" : [{ "name" : "username", "type" : "string" },
       			   { "name" : "clientIP", "type": "string"},
       			   { "name" : "clientPort", "type": "int"}],
       "response" : "boolean"
@@ -24,7 +24,7 @@
     },
     "leave" : {
       "request" : [{ "name" : "username", "type" : "string" }],
-      "response" : "boolean"	
+      "response" : "boolean"
     },
     "exit" : {
       "request" : [{ "name" : "username", "type" : "string" }],

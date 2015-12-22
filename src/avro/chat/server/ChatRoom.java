@@ -9,10 +9,10 @@ public class ChatRoom {
 
 	/***
 	 * Connects the user to the public room if he is not connected yet.
-	 * 
+	 *
 	 * @param username
 	 *            The nickname of the user.
-	 * 
+	 *
 	 * @return boolean Whether the user was added to the room or not.
 	 */
 	public boolean join(String username) {
@@ -26,10 +26,10 @@ public class ChatRoom {
 
 	/***
 	 * Check if the user is in the chatroom.
-	 * 
+	 *
 	 * @param username
 	 *            The nickname of the user.
-	 * 
+	 *
 	 * @return boolean Whether the room contains the user.
 	 */
 	public boolean contains(String username) {
@@ -42,7 +42,7 @@ public class ChatRoom {
 
 	/***
 	 * Disconnects the user from the public room.
-	 * 
+	 *
 	 * @param username
 	 *            The nickname of the user.
 	 */
@@ -52,7 +52,7 @@ public class ChatRoom {
 
 	/***
 	 * Logs a message of the user. Must be used after join(username).
-	 * 
+	 *
 	 * @param username
 	 *            The nickname of the user.
 	 * @param message
