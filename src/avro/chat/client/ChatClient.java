@@ -70,12 +70,19 @@ public class ChatClient implements ChatClientServer {
     public boolean sendRequest(String message) throws AvroRemoteException {
         System.out.println(message);
         System.out.println("Enter and then type 'y' to accept or 'n' to decline.");
-        Scanner reader = new Scanner(System.in);
-        if (reader.hasNext("y")) {
-            reader.close();
+
+        Scanner scan = new Scanner(System.in);
+        char r = 'n';
+        while (scan.hasNext()) {
+            r = scan.next(".").charAt(0);
+
+        }
+        //char r = scan.next().charAt(0);
+        scan.close();
+        if (r == 'y') {
+            System.out.println("Yes");
             return true;
         } else {
-            reader.close();
             return false;
         }
     }
@@ -120,24 +127,22 @@ public class ChatClient implements ChatClientServer {
      * @throws AvroRemoteException
      */
     @Override
-    public boolean connectToClient(String privateName, String privateIP) throws AvroRemoteException {
+    public boolean connectToClient(String privateName, String privateAddress) throws AvroRemoteException {
         try {
-            String privateAddress = ((privateIP.split(":"))[0]).substring(1);
-            System.out.println(privateAddress);
-            int privatePort = Integer.parseInt((privateIP.split(":"))[1]);
-            System.out.println(privatePort);
+            String privateIP = ((privateAddress.split(":"))[0]).substring(1);
+            int privatePort = Integer.parseInt((privateAddress.split(":"))[1]);
             Transceiver transceiver = new SaslSocketTransceiver(new InetSocketAddress(
-                InetAddress.getByName(privateAddress), privatePort));
+                InetAddress.getByName(privateIP), privatePort));
 
             ChatClientServer clientProxy = (ChatClientServer) SpecificRequestor
                     .getClient(ChatClientServer.class, transceiver);
 
             if (clientProxy.register(username, clientIP, clientPort)) {
                 System.out.println(
-                        "You are successfully registered to the server.");
+                        "You are successfully registered to " + privateName);
             } else {
                 System.out.println(
-                        "Something went wrong when registering with the client.");
+                        "Something went wrong when registering to " + privateName);
                 System.exit(1);
             }
 
@@ -243,6 +248,7 @@ public class ChatClient implements ChatClientServer {
 
             Chat chatProxy = (Chat) SpecificRequestor.getClient(Chat.class,
                     transceiver);
+            Chat.Callback chatCallbackProxy = SpecificRequestor.getClient(Chat.Callback.class, transceiver);
 
             if (chatProxy.register(username, clientIP, clientPort)) {
                 System.out.println(
@@ -255,7 +261,7 @@ public class ChatClient implements ChatClientServer {
             }
 
             ShellFactory.createConsoleShell("client", "",
-                    new ClientUI(chatProxy, username)).commandLoop();
+                    new ClientUI(chatProxy, chatCallbackProxy, username)).commandLoop();
 
             chatProxy.exit(username);
             transceiver.close();

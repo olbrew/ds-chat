@@ -5,19 +5,24 @@ import asg.cliche.Param;
 import avro.chat.proto.Chat;
 import avro.chat.proto.ChatClientServer;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import org.apache.avro.AvroRemoteException;
+import org.apache.avro.ipc.CallFuture;
 
 public class ClientUI {
 	private String username;
 	private Chat chatProxy = null;
+	private Chat.Callback chatCallbackProxy = null;
 	private ChatClientServer chatClientProxy = null;
 	// TODO set ChatClientServer proxies for both clients once private room is
 	// initialized, remove it once someone disconnects / crashes
 
-	public ClientUI(Chat proxy, String user) {
+	public ClientUI(Chat proxy, Chat.Callback callbackProxy, String user) {
 		chatProxy = proxy;
+		chatCallbackProxy = callbackProxy;
 		username = user;
 	}
 
@@ -38,8 +43,18 @@ public class ClientUI {
 		// TODO determine if the client is already in a private room to use
 		// correct proxy to join the (public) chatroom and consequently leave
 		// the old one
-		String output = chatProxy.join(username, room);
-		System.out.println(output);
+		
+		try {
+			CallFuture<String> future = new CallFuture<String>();
+			chatCallbackProxy.join(username, room, future);
+			System.out.println(future.get());
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		} catch (ExecutionException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Command(description = "Terminates connection with the public/private room.")
@@ -88,5 +103,10 @@ public class ClientUI {
 					+ " Use `join username` before initiating videostream.";
 			System.err.println(output);
 		}
+	}
+	
+	@Command(description = "Accept requests")
+	public boolean accept() throws AvroRemoteException {
+			return true;
 	}
 }

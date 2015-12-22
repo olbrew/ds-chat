@@ -12,6 +12,6 @@
 </listAttribute>
 <booleanAttribute key="org.eclipse.jdt.launching.ATTR_USE_START_ON_FIRST_THREAD" value="true"/>
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="avro.chat.client.ChatClient"/>
-<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="Olivier&#10;143.129.78.80&#10;10010&#10;143.129.78.80&#10;11001"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="Olivier&#10;11001"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="Avro"/>
 </launchConfiguration>
