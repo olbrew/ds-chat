@@ -22,6 +22,19 @@ public class ChatServer implements Chat, Runnable {
 	private Hashtable<String, Transceiver> clients = new Hashtable<String, Transceiver>();
 	private Hashtable<String, ChatClientServer> clientsServer = new Hashtable<String, ChatClientServer>();
 
+    /** Proxy methods **/
+    /***
+     * Simple method to test if the server is still alive.
+     *
+     * @return null Returns null if it can answer and is thus still alive.
+     *
+     * @throws AvroRemoteException
+     */
+    @Override
+    public Void isAlive() throws AvroRemoteException {
+        return null;
+    }
+    
 	/***
 	 * Registers client's username to its local server proxy so we can
 	 * communicate both ways.
