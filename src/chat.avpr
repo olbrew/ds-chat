@@ -2,6 +2,10 @@
   "protocol" : "Chat",
 
   "messages" : {
+    "isAlive" : {
+      "request" : [],
+      "response" : "null"
+    },
     "register" : {
       "request" : [{ "name" : "username", "type" : "string" },
       			   { "name" : "clientIP", "type": "string"},

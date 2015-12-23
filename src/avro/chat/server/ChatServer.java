@@ -23,29 +23,42 @@ public class ChatServer implements Chat, Runnable {
     private Hashtable<String, ChatClientServer> clientsServer = new Hashtable<String, ChatClientServer>();
     private Hashtable<String, String> pendingRequests = new Hashtable<String, String>();
 
+    /** Proxy methods **/
     /***
-     * Registers client's username to its local server proxy so we can
-     * communicate both ways.
+     * Simple method to test if the server is still alive.
      *
-     * @param username
-     *            The nickname of the client.
-     * @param clientIP
-     *            The IP address of the client.
-     * @param clientServerPort
-     *            The port to which client's local server is bound to.
-     *
-     * @return boolean Whether the client was successfully registered on the
-     *         server.
+     * @return null Returns null if it can answer and is thus still alive.
      *
      * @throws AvroRemoteException
      */
     @Override
-    public boolean register(String username, String clientIP, int clientServerPort) throws AvroRemoteException {
-	try {
-	    Transceiver transceiver = new SaslSocketTransceiver(
-		    new InetSocketAddress(InetAddress.getByName(clientIP), clientServerPort));
-	    ChatClientServer proxy = (ChatClientServer) SpecificRequestor.getClient(ChatClientServer.class,
-		    transceiver);
+    public Void isAlive() throws AvroRemoteException {
+        return null;
+    }
+
+	/***
+	 * Registers client's username to its local server proxy so we can
+	 * communicate both ways.
+	 *
+	 * @param username
+	 *            The nickname of the client.
+	 * @param clientIP
+	 *            The IP address of the client.
+	 * @param clientServerPort
+	 *            The port to which client's local server is bound to.
+	 *
+	 * @return boolean Whether the client was successfully registered on the
+	 *         server.
+	 *
+	 * @throws AvroRemoteException
+	 */
+	@Override
+	public boolean register(String username, String clientIP, int clientServerPort) throws AvroRemoteException {
+		try {
+			Transceiver transceiver = new SaslSocketTransceiver(
+					new InetSocketAddress(InetAddress.getByName(clientIP), clientServerPort));
+			ChatClientServer proxy = (ChatClientServer) SpecificRequestor.getClient(ChatClientServer.class,
+					transceiver);
 
 	    if (!clients.containsKey(username)) {
 		clients.put(username, transceiver);
