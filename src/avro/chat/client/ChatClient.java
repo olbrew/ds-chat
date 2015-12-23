@@ -1,6 +1,7 @@
 package avro.chat.client;
 
 import java.io.IOException;
+import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.Scanner;
@@ -18,16 +19,21 @@ import asg.cliche.client.ClientUI;
 import avro.chat.proto.Chat;
 import avro.chat.proto.ChatClientServer;
 
-public class ChatClient implements ChatClientServer {
+public class ChatClient implements ChatClientServer, Runnable {
     /** Fields **/
     String username;
 
     String serverIP;
     int serverPort;
-
+    Transceiver chatTransceiver;
+    Chat chatProxy;
+    InetSocketAddress serverSocket;
+    
     static String clientIP = "127.0.0.1";
     int clientPort;
     Server localServer;
+    
+    ClientUI clicheUI;
 
     /** Proxy methods **/
     /***
@@ -242,13 +248,12 @@ public class ChatClient implements ChatClientServer {
      */
     public void connectToServer() {
         try {
-            Transceiver transceiver = new SaslSocketTransceiver(
-                    new InetSocketAddress(InetAddress.getByName(serverIP),
-                            serverPort));
+        	serverSocket = new InetSocketAddress(InetAddress.getByName(serverIP), serverPort);
+        	chatTransceiver = new SaslSocketTransceiver(serverSocket);
 
-            Chat chatProxy = (Chat) SpecificRequestor.getClient(Chat.class,
-                    transceiver);
-            Chat.Callback chatCallbackProxy = SpecificRequestor.getClient(Chat.Callback.class, transceiver);
+            chatProxy = (Chat) SpecificRequestor.getClient(Chat.class,
+            		chatTransceiver);
+            Chat.Callback chatCallbackProxy = SpecificRequestor.getClient(Chat.Callback.class, chatTransceiver);
 
             if (chatProxy.register(username, clientIP, clientPort)) {
                 System.out.println(
@@ -260,11 +265,15 @@ public class ChatClient implements ChatClientServer {
                 System.exit(1);
             }
 
-            ShellFactory.createConsoleShell("client", "",
-                    new ClientUI(chatProxy, chatCallbackProxy, username)).commandLoop();
+            Thread t = new Thread(this);
+            t.start();
+            
+            clicheUI = new ClientUI(chatProxy, chatCallbackProxy, username);
+            ShellFactory.createConsoleShell("client", "", clicheUI).commandLoop();
 
+            //TODO if server is offline, following command will throw an IOException
             chatProxy.exit(username);
-            transceiver.close();
+            chatTransceiver.close();
         } catch (IOException e) {
             System.err.println(
                     "ERROR: Unknown remote host. Double check server-ip and server-port.");
@@ -272,6 +281,64 @@ public class ChatClient implements ChatClientServer {
         }
     }
 
+	/***
+	 * Tries to ping the server up to n times in increasing intervals (multiples
+	 * of 5). Gives up after 75 seconds.
+	 *
+	 * @param n
+	 *            Number of recent failed attempts to reconnect to server.
+	 */
+	private void reconnect(int n) {
+		try {
+			if (n == 6) {
+				System.err.println("Failed to reconnect to server after " + n + " attempts.\n"
+						+ "Closing transceiver, you may try to connect to server manually later.");
+
+				chatTransceiver.close();
+				return;
+			} else {
+				System.err.println("Cannot access server, trying to reconnect in " + n * 5 + " seconds.");
+
+				Thread.sleep(n * 5000); // milliseconds
+				chatTransceiver.close();
+	        	chatTransceiver = new SaslSocketTransceiver(serverSocket);
+
+	            chatProxy = (Chat) SpecificRequestor.getClient(Chat.class,
+	            		chatTransceiver);
+				
+				chatProxy.isAlive();
+				clicheUI.updateChatProxy(chatProxy);
+				chatProxy.register(username, clientIP, clientPort);
+				System.out.println("Server is accessible again.");
+				return;
+			}
+		} catch (ConnectException e) {
+			reconnect(++n); // server is still offline
+		} catch (AvroRemoteException e) {
+			reconnect(++n); // server is still offline
+		} catch (InterruptedException e) {
+			e.printStackTrace(); // thread interrupted
+		} catch (IOException e) {
+			e.printStackTrace(); // transceiver close
+		}
+	}
+
+	@Override
+	public void run() {
+		try {
+			while (true) {
+				chatProxy.isAlive();
+				Thread.sleep(5000); // milliseconds
+			}
+		} catch (InterruptedException e) {
+			// This thread was interrupted, it needs to stop doing what it was
+			// trying to do
+			e.printStackTrace();
+		} catch (AvroRemoteException e) {
+			reconnect(1);
+		}
+	}
+	
     public static void main(String[] args) {
         try {
             ChatClient chatClient = new ChatClient();
