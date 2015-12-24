@@ -33,32 +33,32 @@ public class ChatServer implements Chat, Runnable {
      */
     @Override
     public Void isAlive() throws AvroRemoteException {
-        return null;
+	return null;
     }
 
-	/***
-	 * Registers client's username to its local server proxy so we can
-	 * communicate both ways.
-	 *
-	 * @param username
-	 *            The nickname of the client.
-	 * @param clientIP
-	 *            The IP address of the client.
-	 * @param clientServerPort
-	 *            The port to which client's local server is bound to.
-	 *
-	 * @return boolean Whether the client was successfully registered on the
-	 *         server.
-	 *
-	 * @throws AvroRemoteException
-	 */
-	@Override
-	public boolean register(String username, String clientIP, int clientServerPort) throws AvroRemoteException {
-		try {
-			Transceiver transceiver = new SaslSocketTransceiver(
-					new InetSocketAddress(InetAddress.getByName(clientIP), clientServerPort));
-			ChatClientServer proxy = (ChatClientServer) SpecificRequestor.getClient(ChatClientServer.class,
-					transceiver);
+    /***
+     * Registers client's username to its local server proxy so we can
+     * communicate both ways.
+     *
+     * @param username
+     *            The nickname of the client.
+     * @param clientIP
+     *            The IP address of the client.
+     * @param clientServerPort
+     *            The port to which client's local server is bound to.
+     *
+     * @return boolean Whether the client was successfully registered on the
+     *         server.
+     *
+     * @throws AvroRemoteException
+     */
+    @Override
+    public boolean register(String username, String clientIP, int clientServerPort) throws AvroRemoteException {
+	try {
+	    Transceiver transceiver = new SaslSocketTransceiver(
+		    new InetSocketAddress(InetAddress.getByName(clientIP), clientServerPort));
+	    ChatClientServer proxy = (ChatClientServer) SpecificRequestor.getClient(ChatClientServer.class,
+		    transceiver);
 
 	    if (!clients.containsKey(username)) {
 		clients.put(username, transceiver);
@@ -229,31 +229,39 @@ public class ChatServer implements Chat, Runnable {
      */
     @Override
     public boolean setupConnection(String client1, String client2) throws AvroRemoteException {
-	clientsServer.get(client2).incomingMessage("server> " + client1 + " has accepted your connection."
-		+ "\nserver> Your existing chats will now be closed and a private connection will be made.");
+	if (pendingRequests.containsKey(client1)) {
+	    if ((pendingRequests.get(client1)).equals(client2)) {
+		clientsServer.get(client1).incomingMessage("server> " + client2 + " has accepted your connection."
+			+ "\nserver> Your existing chats will now be closed and a private connection will be made.");
 
-	if (publicRoom.contains(client1)) {
-	    leave(client1);
-	}
-	if (publicRoom.contains(client2)) {
-	    leave(client2);
-	}
+		if (publicRoom.contains(client1)) {
+		    leave(client1);
+		}
+		if (publicRoom.contains(client2)) {
+		    leave(client2);
+		}
 
-	try {
-	    System.out.println("server> Setting up connections between " + client1 + " and " + client2);
-	    String client1Address = (clients.get(client1)).getRemoteName();
-	    String client2Address = (clients.get(client2)).getRemoteName();
-	    if (((clientsServer.get(client1)).connectToClient(client2, client2Address))
-		    && ((clientsServer.get(client2)).connectToClient(client1, client1Address))) {
-		System.out.println("server> Connection succesfully made between" + client1 + " and " + client2);
-		return true;
+		try {
+		    System.out.println("server> Setting up connections between " + client1 + " and " + client2);
+		    String client1Address = (clients.get(client1)).getRemoteName();
+		    String client2Address = (clients.get(client2)).getRemoteName();
+		    if (((clientsServer.get(client1)).connectToClient(client2, client2Address))
+			    && ((clientsServer.get(client2)).connectToClient(client1, client1Address))) {
+			System.out.println("server> Connection succesfully made between" + client1 + " and " + client2);
+			return true;
+		    } else {
+			System.err.println("server> Something went wrong with setting up connections between " + client1
+				+ " and " + client2);
+			return false;
+		    }
+		} catch (IOException e) {
+		    e.printStackTrace();
+		    return false;
+		}
 	    } else {
-		System.err.println("server> Something went wrong with setting up connections between " + client1
-			+ " and " + client2);
 		return false;
 	    }
-	} catch (IOException e) {
-	    e.printStackTrace();
+	} else {
 	    return false;
 	}
     }
