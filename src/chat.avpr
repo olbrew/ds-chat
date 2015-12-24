@@ -34,10 +34,6 @@
     "leave" : {
       "request" : [{ "name" : "username", "type" : "string" }],
       "response" : "boolean"
-    },
-    "exit" : {
-      "request" : [{ "name" : "username", "type" : "string" }],
-      "response" : "null"
     }
   }
 }

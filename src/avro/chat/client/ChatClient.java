@@ -33,7 +33,8 @@ public class ChatClient implements ChatClientServer, Runnable {
 	int clientPort;
 	Server localServer;
 
-	ClientUI clicheUI;
+	Transceiver privateTransceiver = null;
+	ChatClientServer privateProxy = null;
 
 	/** Proxy methods **/
 	/***
@@ -46,6 +47,25 @@ public class ChatClient implements ChatClientServer, Runnable {
 	@Override
 	public Void isAlive() throws AvroRemoteException {
 		return null;
+	}
+
+	/***
+	 * Simple method to test if the client is still alive.
+	 *
+	 * @return null Returns null if it it can answer and is thus still alive.
+	 */
+	@Override
+	public boolean inPrivateRoom() {
+		if (privateProxy != null) {
+			try {
+				privateProxy.isAlive();
+				return true;
+			} catch (AvroRemoteException e) {
+				privateProxy = null;
+				return false;
+			}
+		}
+		return false;
 	}
 
 	/***
@@ -63,6 +83,22 @@ public class ChatClient implements ChatClientServer, Runnable {
 	}
 
 	/***
+	 * Allows a client to send a message to private room.
+	 * 
+	 * @param message
+	 *            The message to be delivered.
+	 *
+	 * @throws AvroRemoteException
+	 */
+	@Override
+	public Void sendMessage(String senderName, String message) throws AvroRemoteException {
+		System.out.println(senderName + "> (Private): " + message);
+		privateProxy.incomingMessage(senderName + "> (Private): " + message);
+
+		return null;
+	}
+
+	/***
 	 * Allows videostreaming to be intitiated between two clients.
 	 *
 	 * @param message
@@ -75,9 +111,7 @@ public class ChatClient implements ChatClientServer, Runnable {
 	 * @throws AvroRemoteException
 	 */
 	@Override
-	public boolean sendVideoRequest(String message, String file) throws AvroRemoteException {
-		System.out.println(message);
-
+	public boolean sendVideoRequest(String file) throws AvroRemoteException {
 		Scanner reader = new Scanner(System.in);
 		System.out.println("Enter and then type 'y' to accept or 'n' to decline.");
 		if (reader.hasNext("y")) {
@@ -100,26 +134,16 @@ public class ChatClient implements ChatClientServer, Runnable {
 	 * @throws AvroRemoteException
 	 */
 	@Override
-	public boolean connectToClient(String privateName, String privateAddress) throws AvroRemoteException {
+	public boolean register(String username, String privateAddress) throws AvroRemoteException {
+		String privateIP = ((privateAddress.split(":"))[0]).substring(1);
+		int privatePort = Integer.parseInt((privateAddress.split(":"))[1]);
+
 		try {
-			String privateIP = ((privateAddress.split(":"))[0]).substring(1);
-			int privatePort = Integer.parseInt((privateAddress.split(":"))[1]);
-			Transceiver transceiver = new SaslSocketTransceiver(
+			privateTransceiver = new SaslSocketTransceiver(
 					new InetSocketAddress(InetAddress.getByName(privateIP), privatePort));
 
-			ChatClientServer clientProxy = (ChatClientServer) SpecificRequestor.getClient(ChatClientServer.class,
-					transceiver);
+			privateProxy = (ChatClientServer) SpecificRequestor.getClient(ChatClientServer.class, privateTransceiver);
 
-			if (clientProxy.register(username, clientIP, clientPort)) {
-				System.out.println("You are successfully registered to " + privateName);
-			} else {
-				System.out.println("Something went wrong when registering to " + privateName);
-			}
-			// ShellFactory.createConsoleShell("client", "", new
-			// ClientUI(chatProxy, username)).commandLoop();
-
-			clientProxy.exit(username);
-			transceiver.close();
 			return true;
 		} catch (IOException e) {
 			return false;
@@ -127,20 +151,18 @@ public class ChatClient implements ChatClientServer, Runnable {
 	}
 
 	@Override
-	public boolean register(String username, String clientIP, int clientPort) throws AvroRemoteException {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public String sendMessage(String username, String message) throws AvroRemoteException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Void exit(String username) throws AvroRemoteException {
-		// TODO Auto-generated method stub
+	public Void leave(boolean closeOtherProxy) throws AvroRemoteException {
+		if (closeOtherProxy) {
+			privateProxy.leave(false);
+			privateProxy = null;
+		}
+		try {
+			privateTransceiver.close();
+			System.out.println("client> You have left the private chat.\n"
+					+ "client> You can 'join' a new one now if you want.");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		return null;
 	}
 
@@ -239,15 +261,18 @@ public class ChatClient implements ChatClientServer, Runnable {
 			Thread t = new Thread(this);
 			t.start();
 
-			clicheUI = new ClientUI(chatProxy, username);
-			ShellFactory.createConsoleShell("client", "", clicheUI).commandLoop();
+			Transceiver clientTransceiver = new SaslSocketTransceiver(
+					new InetSocketAddress(InetAddress.getByName(clientIP), clientPort));
+			ChatClientServer clientProxy = (ChatClientServer) SpecificRequestor.getClient(ChatClientServer.class,
+					clientTransceiver);
 
-			// TODO if server is offline, following command will throw an
-			// IOException
-			chatProxy.exit(username);
+			ShellFactory.createConsoleShell("client", "", new ClientUI(username, clientProxy, chatProxy)).commandLoop();
+
+			t.interrupt();
+			chatProxy.leave(username);
 			chatTransceiver.close();
 		} catch (IOException e) {
-			System.err.println("ERROR: Unknown remote host. Double check server-ip and server-port.");
+			System.err.println("client> Something went wrong when communicating with the server.");
 			System.exit(1);
 		}
 	}
@@ -262,13 +287,13 @@ public class ChatClient implements ChatClientServer, Runnable {
 	private void reconnect(int n) {
 		try {
 			if (n == 6) {
-				System.err.println("Failed to reconnect to server after " + n + " attempts.\n"
-						+ "Closing transceiver, you may try to connect to server manually later.");
+				System.err.println("client> Failed to reconnect to server after " + n + " attempts.\n"
+						+ "client> Closing transceiver, you may try to connect to the server manually later.");
 
 				chatTransceiver.close();
 				return;
 			} else {
-				System.err.println("Cannot access server, trying to reconnect in " + n * 5 + " seconds.");
+				System.err.println("client> Cannot access the server, trying to reconnect in " + n * 5 + " seconds.");
 
 				Thread.sleep(n * 5000); // milliseconds
 				chatTransceiver.close();
@@ -277,7 +302,6 @@ public class ChatClient implements ChatClientServer, Runnable {
 				chatProxy = (Chat) SpecificRequestor.getClient(Chat.class, chatTransceiver);
 
 				chatProxy.isAlive();
-				clicheUI.updateChatProxy(chatProxy);
 				chatProxy.register(username, clientIP, clientPort);
 				System.out.println("Server is accessible again.");
 				return;
@@ -293,20 +317,44 @@ public class ChatClient implements ChatClientServer, Runnable {
 		}
 	}
 
+	private void checkServer() throws InterruptedException {
+		try {
+			chatProxy.isAlive();
+			Thread.sleep(5000); // milliseconds
+		} catch (AvroRemoteException e) {
+			reconnect(1);
+		}
+	}
+
+	private void checkPrivateUser() throws InterruptedException {
+		try {
+			if (inPrivateRoom()) {
+				privateProxy.isAlive();
+				Thread.sleep(5000); // milliseconds
+			}
+		} catch (AvroRemoteException e) {
+			try {
+				leave(false);
+				String output = "client> The other user from this private room has gone offline.\n"
+						+ "client> You have been automatically disconnected.";
+				System.err.println(output);
+			} catch (AvroRemoteException e1) {
+				e1.printStackTrace();
+			}
+		}
+	}
+
 	@Override
 	public void run() {
 		try {
 			while (true) {
-				chatProxy.isAlive();
-				Thread.sleep(5000); // milliseconds
+				checkServer();
+				checkPrivateUser();
 			}
-		} catch (InterruptedException e) {
+		}  catch (InterruptedException e) {
 			// This thread was interrupted, it needs to stop doing what it was
 			// trying to do
-			e.printStackTrace();
-		} catch (AvroRemoteException e) {
-			reconnect(1);
-		}
+		} 
 	}
 
 	public static void main(String[] args) {
