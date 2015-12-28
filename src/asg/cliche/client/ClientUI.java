@@ -118,8 +118,9 @@ public class ClientUI {
 	    if (client.getServerProxy().setupConnection(chatPartner, client.getUsername())) {
 		System.out.println("server> Connection set up, you can chat privately now.");
 	    } else {
-		System.err.println("server> Something went wrong with settin up the connection.\n"
+		System.err.println("server> Something went wrong with setting up the connection.\n"
 			+ "server> Are you sure you got a chat request from " + chatPartner + "?\n"
+			+ "server> Check if " + chatPartner + " is still online by typing 'gcl'.\n"
 			+ "server> If so try again by reaccepting with 'accept'");
 	    }
 	} catch (AvroRemoteException e) {

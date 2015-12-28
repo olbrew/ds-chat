@@ -175,6 +175,7 @@ public class ChatServer implements Chat, Runnable {
      */
     private Void exit(String userName) throws AvroRemoteException {
 	leave(userName);
+	pendingRequests.remove(userName);
 	clients.remove(userName);
 	clientsServer.remove(userName);
 	System.out.println("server> " + userName + " has exited the server.");
