@@ -57,8 +57,7 @@ public class ChatClient implements ChatClientServer, Runnable {
      * @throws AvroRemoteException
      */
     @Override
-    public boolean inPrivateRoom() throws AvroRemoteException 
-{
+    public boolean inPrivateRoom() throws AvroRemoteException {
 	if (privateProxy != null) {
 	    try {
 		privateProxy.isAlive();
@@ -369,8 +368,8 @@ public class ChatClient implements ChatClientServer, Runnable {
     }
 
     /***
-     * This thread runs a polling function which checks if the server 
-     * and the chat partner, if you're in a private room, is still alive.
+     * This thread runs a polling function which checks if the server and the
+     * chat partner, if you're in a private room, is still alive.
      */
     @Override
     public void run() {
@@ -388,8 +387,7 @@ public class ChatClient implements ChatClientServer, Runnable {
     /***
      * Main method for the client.
      * 
-     * Configures and starts a chatClient.
-     * Then connect to the server.
+     * Configures and starts a chatClient. Then connect to the server.
      * 
      * @param args
      *            CLI arguments which are passed to the configure function.
