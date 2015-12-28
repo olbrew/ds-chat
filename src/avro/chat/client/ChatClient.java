@@ -21,20 +21,37 @@ import avro.chat.proto.ChatClientServer;
 
 public class ChatClient implements ChatClientServer, Runnable {
     /** Fields **/
-    String username;
-
+    // Main server
     String serverIP;
     int serverPort;
-    Transceiver chatTransceiver;
-    Chat chatProxy;
     InetSocketAddress serverSocket;
+    Transceiver serverTransceiver;
+    Chat serverProxy;
 
+    // Our local server
+    String username;
     static String clientIP = "127.0.0.1";
     int clientPort;
     Server localServer;
+    Transceiver clientTransceiver;
+    ChatClientServer clientProxy;
 
+    // Other client connected to us
     Transceiver privateTransceiver = null;
     ChatClientServer privateProxy = null;
+
+    /** Getters **/
+    public Chat getServerProxy() {
+	return serverProxy;
+    }
+
+    public String getUsername() {
+	return username;
+    }
+
+    public ChatClientServer getClientProxy() {
+	return clientProxy;
+    }
 
     /** Proxy methods **/
     /***
@@ -194,6 +211,9 @@ public class ChatClient implements ChatClientServer, Runnable {
 	    System.out.println("Starting client's local server on " + clientIP + ":" + clientPort);
 	} catch (IOException e) {
 	    System.err.println("ERROR: Starting local server for client. Double check local-ip and local-port.");
+	    if (localServer != null) {
+		localServer.close();
+	    }
 	    System.exit(1);
 	}
 	localServer.start();
@@ -263,31 +283,37 @@ public class ChatClient implements ChatClientServer, Runnable {
     public void connectToServer() {
 	try {
 	    serverSocket = new InetSocketAddress(InetAddress.getByName(serverIP), serverPort);
-	    chatTransceiver = new SaslSocketTransceiver(serverSocket);
+	    serverTransceiver = new SaslSocketTransceiver(serverSocket);
 
-	    chatProxy = (Chat) SpecificRequestor.getClient(Chat.class, chatTransceiver);
+	    serverProxy = (Chat) SpecificRequestor.getClient(Chat.class, serverTransceiver);
 
-	    if (chatProxy.register(username, clientIP, clientPort)) {
+	    if (serverProxy.register(username, clientIP, clientPort)) {
 		System.out.println("You are successfully registered to the server.");
 	    } else {
 		System.out.println(
 			"Something went wrong when registering with the server." + " Maybe you've already registered.");
+		if (serverTransceiver != null) {
+		    serverTransceiver.close();
+		}
+		if (localServer != null) {
+		    localServer.close();
+		}
 		System.exit(1);
 	    }
 
 	    Thread t = new Thread(this);
 	    t.start();
 
-	    Transceiver clientTransceiver = new SaslSocketTransceiver(
+	    clientTransceiver = new SaslSocketTransceiver(
 		    new InetSocketAddress(InetAddress.getByName(clientIP), clientPort));
-	    ChatClientServer clientProxy = (ChatClientServer) SpecificRequestor.getClient(ChatClientServer.class,
-		    clientTransceiver);
+	    clientProxy = (ChatClientServer) SpecificRequestor.getClient(ChatClientServer.class, clientTransceiver);
 
-	    ShellFactory.createConsoleShell("client", "", new ClientUI(username, clientProxy, chatProxy)).commandLoop();
+	    ShellFactory.createConsoleShell("client", "", new ClientUI(this)).commandLoop();
 
 	    t.interrupt();
-	    chatProxy.leave(username);
-	    chatTransceiver.close();
+	    serverProxy.leave(username);
+	    clientTransceiver.close();
+	    serverTransceiver.close();
 	} catch (IOException e) {
 	    System.err.println("client> Something went wrong when communicating with the server.");
 	    System.exit(1);
@@ -307,19 +333,20 @@ public class ChatClient implements ChatClientServer, Runnable {
 		System.err.println("client> Failed to reconnect to server after " + n + " attempts.\n"
 			+ "client> Closing transceiver, you may try to connect to the server manually later.");
 
-		chatTransceiver.close();
+		serverTransceiver.close();
 		return;
 	    } else {
 		System.err.println("client> Cannot access the server, trying to reconnect in " + n * 5 + " seconds.");
 
 		Thread.sleep(n * 5000); // milliseconds
-		chatTransceiver.close();
-		chatTransceiver = new SaslSocketTransceiver(serverSocket);
 
-		chatProxy = (Chat) SpecificRequestor.getClient(Chat.class, chatTransceiver);
+		serverSocket = new InetSocketAddress(InetAddress.getByName(serverIP), serverPort);
+		serverTransceiver = new SaslSocketTransceiver(serverSocket);
+		serverProxy = (Chat) SpecificRequestor.getClient(Chat.class, serverTransceiver);
 
-		chatProxy.isAlive();
-		chatProxy.register(username, clientIP, clientPort);
+		serverProxy.isAlive();
+		serverProxy.register(username, clientIP, clientPort);
+
 		System.out.println("Server is accessible again.");
 		return;
 	    }
@@ -339,7 +366,7 @@ public class ChatClient implements ChatClientServer, Runnable {
      */
     private void checkServer() throws InterruptedException {
 	try {
-	    chatProxy.isAlive();
+	    serverProxy.isAlive();
 	    Thread.sleep(5000); // milliseconds
 	} catch (AvroRemoteException e) {
 	    reconnect(1);
