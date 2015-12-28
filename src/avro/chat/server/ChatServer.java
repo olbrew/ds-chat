@@ -144,7 +144,7 @@ public class ChatServer implements Chat, Runnable {
      *
      * @param userName
      *            The nickname of the client.
-     *            
+     * 
      * @throws AvroRemoteException
      */
     @Override
@@ -170,11 +170,12 @@ public class ChatServer implements Chat, Runnable {
      *
      * @param userName
      *            The nickname of the client.
-     *            
-     * @throws AvroRemoteException 
+     * 
+     * @throws AvroRemoteException
      */
     private Void exit(String userName) throws AvroRemoteException {
 	leave(userName);
+	pendingRequests.remove(userName);
 	clients.remove(userName);
 	clientsServer.remove(userName);
 	System.out.println("server> " + userName + " has exited the server.");
@@ -270,7 +271,7 @@ public class ChatServer implements Chat, Runnable {
      * Checks if all connected users are still alive. If not manually exit them
      * from the server.
      * 
-     * @throws AvroRemoteException 
+     * @throws AvroRemoteException
      */
     private void checkUsers() throws AvroRemoteException {
 	Hashtable<String, Transceiver> clientsCopy = new Hashtable<String, Transceiver>(clients);
