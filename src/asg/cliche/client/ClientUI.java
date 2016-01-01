@@ -115,7 +115,10 @@ public class ClientUI {
     public void accept(
             @Param(name = "chatPartner", description = "The person whose request you would like to accept.") String chatPartner) {
         try {
-            if (client.getServerProxy().setupConnection(chatPartner, client.getUsername())) {
+            if (client.getClientProxy().inPrivateRoom()) {
+                String output = "client> You've to 'leave' the private room before joining another room.";
+                System.out.println(output);
+            } else if (client.getServerProxy().setupConnection(chatPartner, client.getUsername())) {
                 System.out.println("server> Connection set up, you can chat privately now.");
             } else {
                 System.err.println("server> Something went wrong with setting up the connection.\n"

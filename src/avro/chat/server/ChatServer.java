@@ -175,7 +175,6 @@ public class ChatServer implements Chat, Runnable {
      */
     private Void exit(String userName) throws AvroRemoteException {
         leave(userName);
-        pendingRequests.remove(userName);
         clients.remove(userName);
         clientsServer.remove(userName);
         System.out.println("server> " + userName + " has exited the server.");
@@ -249,6 +248,7 @@ public class ChatServer implements Chat, Runnable {
                             && ((clientsServer.get(client2)).register(client1, client1Address))) {
                         System.out
                                 .println("server> Connection succesfully made between " + client1 + " and " + client2);
+                        pendingRequests.remove(client1);
                         return true;
                     } else {
                         System.err.println("server> Something went wrong with setting up connections between " + client1
