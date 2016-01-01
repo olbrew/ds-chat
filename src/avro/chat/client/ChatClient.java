@@ -42,15 +42,15 @@ public class ChatClient implements ChatClientServer, Runnable {
 
     /** Getters **/
     public Chat getServerProxy() {
-	return serverProxy;
+        return serverProxy;
     }
 
     public String getUsername() {
-	return username;
+        return username;
     }
 
     public ChatClientServer getClientProxy() {
-	return clientProxy;
+        return clientProxy;
     }
 
     /** Proxy methods **/
@@ -63,7 +63,7 @@ public class ChatClient implements ChatClientServer, Runnable {
      */
     @Override
     public Void isAlive() throws AvroRemoteException {
-	return null;
+        return null;
     }
 
     /***
@@ -75,16 +75,16 @@ public class ChatClient implements ChatClientServer, Runnable {
      */
     @Override
     public boolean inPrivateRoom() throws AvroRemoteException {
-	if (privateProxy != null) {
-	    try {
-		privateProxy.isAlive();
-		return true;
-	    } catch (AvroRemoteException e) {
-		privateProxy = null;
-		return false;
-	    }
-	}
-	return false;
+        if (privateProxy != null) {
+            try {
+                privateProxy.isAlive();
+                return true;
+            } catch (AvroRemoteException e) {
+                privateProxy = null;
+                return false;
+            }
+        }
+        return false;
     }
 
     /***
@@ -97,8 +97,8 @@ public class ChatClient implements ChatClientServer, Runnable {
      */
     @Override
     public Void incomingMessage(String message) throws AvroRemoteException {
-	System.out.println(message);
-	return null;
+        System.out.println(message);
+        return null;
     }
 
     /***
@@ -111,10 +111,10 @@ public class ChatClient implements ChatClientServer, Runnable {
      */
     @Override
     public Void sendMessage(String senderName, String message) throws AvroRemoteException {
-	System.out.println(senderName + "> (Private): " + message);
-	privateProxy.incomingMessage(senderName + "> (Private): " + message);
+        System.out.println(senderName + "> (Private): " + message);
+        privateProxy.incomingMessage(senderName + "> (Private): " + message);
 
-	return null;
+        return null;
     }
 
     /***
@@ -129,15 +129,15 @@ public class ChatClient implements ChatClientServer, Runnable {
      */
     @Override
     public boolean sendVideoRequest(String file) throws AvroRemoteException {
-	Scanner reader = new Scanner(System.in);
-	System.out.println("Enter and then type 'y' to accept or 'n' to decline.");
-	if (reader.hasNext("y")) {
-	    reader.close();
-	    return true;
-	} else {
-	    reader.close();
-	    return false;
-	}
+        Scanner reader = new Scanner(System.in);
+        System.out.println("Enter and then type 'y' to accept or 'n' to decline.");
+        if (reader.hasNext("y")) {
+            reader.close();
+            return true;
+        } else {
+            reader.close();
+            return false;
+        }
     }
 
     /***
@@ -154,19 +154,19 @@ public class ChatClient implements ChatClientServer, Runnable {
      */
     @Override
     public boolean register(String username, String privateAddress) throws AvroRemoteException {
-	String privateIP = ((privateAddress.split(":"))[0]).substring(1);
-	int privatePort = Integer.parseInt((privateAddress.split(":"))[1]);
+        String privateIP = ((privateAddress.split(":"))[0]).substring(1);
+        int privatePort = Integer.parseInt((privateAddress.split(":"))[1]);
 
-	try {
-	    privateTransceiver = new SaslSocketTransceiver(
-		    new InetSocketAddress(InetAddress.getByName(privateIP), privatePort));
+        try {
+            privateTransceiver = new SaslSocketTransceiver(
+                    new InetSocketAddress(InetAddress.getByName(privateIP), privatePort));
 
-	    privateProxy = (ChatClientServer) SpecificRequestor.getClient(ChatClientServer.class, privateTransceiver);
+            privateProxy = (ChatClientServer) SpecificRequestor.getClient(ChatClientServer.class, privateTransceiver);
 
-	    return true;
-	} catch (IOException e) {
-	    return false;
-	}
+            return true;
+        } catch (IOException e) {
+            return false;
+        }
     }
 
     /***
@@ -181,20 +181,20 @@ public class ChatClient implements ChatClientServer, Runnable {
      */
     @Override
     public Void leave(boolean closeOtherProxy) throws AvroRemoteException {
-	if (closeOtherProxy) {
-	    privateProxy.incomingMessage("client> " + username + " has left the private chat.\n"
-		    + "client> You will automatically be disconnected.");
-	    privateProxy.leave(false);
-	}
-	try {
-	    privateTransceiver.close();
-	    privateProxy = null;
-	    System.out.println(
-		    "client> You have left the private chat.\n" + "client> You can 'join' a new one now if you want.");
-	} catch (IOException e) {
-	    e.printStackTrace();
-	}
-	return null;
+        if (closeOtherProxy) {
+            privateProxy.incomingMessage("client> " + username + " has left the private chat.\n"
+                    + "client> You will automatically be disconnected.");
+            privateProxy.leave(false);
+        }
+        try {
+            privateTransceiver.close();
+            privateProxy = null;
+            System.out.println(
+                    "client> You have left the private chat.\n" + "client> You can 'join' a new one now if you want.");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     /** Methods **/
@@ -205,18 +205,18 @@ public class ChatClient implements ChatClientServer, Runnable {
      * This emulates push based (server side) communication.
      */
     public void startLocalServer() {
-	try {
-	    localServer = new SaslSocketServer(new SpecificResponder(ChatClientServer.class, new ChatClient()),
-		    new InetSocketAddress(clientPort));
-	    System.out.println("Starting client's local server on " + clientIP + ":" + clientPort);
-	} catch (IOException e) {
-	    System.err.println("ERROR: Starting local server for client. Double check local-ip and local-port.");
-	    if (localServer != null) {
-		localServer.close();
-	    }
-	    System.exit(1);
-	}
-	localServer.start();
+        try {
+            localServer = new SaslSocketServer(new SpecificResponder(ChatClientServer.class, new ChatClient()),
+                    new InetSocketAddress(clientPort));
+            System.out.println("Starting client's local server on " + clientIP + ":" + clientPort);
+        } catch (IOException e) {
+            System.err.println("ERROR: Starting local server for client. Double check local-ip and local-port.");
+            if (localServer != null) {
+                localServer.close();
+            }
+            System.exit(1);
+        }
+        localServer.start();
     }
 
     /***
@@ -228,52 +228,52 @@ public class ChatClient implements ChatClientServer, Runnable {
      *            as argument to see the options.
      */
     public void configure(String[] args) {
-	// default values, override with command-line arguments
+        // default values, override with command-line arguments
 
-	// parse command line arguments
-	if (args.length == 0) {
-	    username = "Bob";
-	    serverIP = "127.0.0.1";
-	    serverPort = 10010;
-	    clientPort = 11000;
-	} else if (args.length == 1) {
-	    System.out.println("Usage: ant ChatClient [args]");
-	    System.out.println("----------------------------");
-	    System.out.println(
-		    "0 arguments use our defaults: username = Bob, server ip-address = 127.0.0.1, server port = 10010, client ip-address = 127.0.0.1, client port = 11000");
-	    System.out.println("2 arguments => username, client port. Rest uses defaults.");
-	    System.out.println(
-		    "4 arguments => username, server ip-address, server port, client port. Rest uses defaults.");
-	    System.out.println(
-		    "5 arguments => username, server ip-address, server port, client ip-address, client port.");
-	    System.exit(0);
-	} else if (args.length == 2) {
-	    username = args[0];
-	    serverIP = "127.0.0.1";
-	    serverPort = 10010;
-	    clientPort = Integer.parseInt(args[1]);
-	} else if (args.length == 4) {
-	    username = args[0];
-	    serverIP = args[1];
-	    serverPort = Integer.parseInt(args[2]);
-	    clientPort = Integer.parseInt(args[3]);
-	} else if (args.length == 5) {
-	    username = args[0];
-	    serverIP = args[1];
-	    serverPort = Integer.parseInt(args[2]);
-	    clientIP = args[3];
-	    clientPort = Integer.parseInt(args[4]);
-	} else {
-	    System.err.println("ERROR: Invalid argument[s]. Try `ant ChatClient help` to see your options.");
-	    System.exit(1);
-	}
+        // parse command line arguments
+        if (args.length == 0) {
+            username = "Bob";
+            serverIP = "127.0.0.1";
+            serverPort = 10010;
+            clientPort = 11000;
+        } else if (args.length == 1) {
+            System.out.println("Usage: ant ChatClient [args]");
+            System.out.println("----------------------------");
+            System.out.println(
+                    "0 arguments use our defaults: username = Bob, server ip-address = 127.0.0.1, server port = 10010, client ip-address = 127.0.0.1, client port = 11000");
+            System.out.println("2 arguments => username, client port. Rest uses defaults.");
+            System.out.println(
+                    "4 arguments => username, server ip-address, server port, client port. Rest uses defaults.");
+            System.out.println(
+                    "5 arguments => username, server ip-address, server port, client ip-address, client port.");
+            System.exit(0);
+        } else if (args.length == 2) {
+            username = args[0];
+            serverIP = "127.0.0.1";
+            serverPort = 10010;
+            clientPort = Integer.parseInt(args[1]);
+        } else if (args.length == 4) {
+            username = args[0];
+            serverIP = args[1];
+            serverPort = Integer.parseInt(args[2]);
+            clientPort = Integer.parseInt(args[3]);
+        } else if (args.length == 5) {
+            username = args[0];
+            serverIP = args[1];
+            serverPort = Integer.parseInt(args[2]);
+            clientIP = args[3];
+            clientPort = Integer.parseInt(args[4]);
+        } else {
+            System.err.println("ERROR: Invalid argument[s]. Try `ant ChatClient help` to see your options.");
+            System.exit(1);
+        }
 
-	if (serverPort == clientPort) {
-	    if (serverIP.equals(clientIP)) {
-		System.err.println("ERROR: Server and client's local server's addresses must be different.");
-		System.exit(1);
-	    }
-	}
+        if (serverPort == clientPort) {
+            if (serverIP.equals(clientIP)) {
+                System.err.println("ERROR: Server and client's local server's addresses must be different.");
+                System.exit(1);
+            }
+        }
     }
 
     /***
@@ -281,43 +281,43 @@ public class ChatClient implements ChatClientServer, Runnable {
      * open until the client exits or the server is down for more than 60s.
      */
     public void connectToServer() {
-	try {
-	    serverSocket = new InetSocketAddress(InetAddress.getByName(serverIP), serverPort);
-	    serverTransceiver = new SaslSocketTransceiver(serverSocket);
+        try {
+            serverSocket = new InetSocketAddress(InetAddress.getByName(serverIP), serverPort);
+            serverTransceiver = new SaslSocketTransceiver(serverSocket);
 
-	    serverProxy = (Chat) SpecificRequestor.getClient(Chat.class, serverTransceiver);
+            serverProxy = (Chat) SpecificRequestor.getClient(Chat.class, serverTransceiver);
 
-	    if (serverProxy.register(username, clientIP, clientPort)) {
-		System.out.println("You are successfully registered to the server.");
-	    } else {
-		System.out.println(
-			"Something went wrong when registering with the server." + " Maybe you've already registered.");
-		if (serverTransceiver != null) {
-		    serverTransceiver.close();
-		}
-		if (localServer != null) {
-		    localServer.close();
-		}
-		System.exit(1);
-	    }
+            if (serverProxy.register(username, clientIP, clientPort)) {
+                System.out.println("You are successfully registered to the server.");
+            } else {
+                System.out.println(
+                        "Something went wrong when registering with the server." + " Maybe you've already registered.");
+                if (serverTransceiver != null) {
+                    serverTransceiver.close();
+                }
+                if (localServer != null) {
+                    localServer.close();
+                }
+                System.exit(1);
+            }
 
-	    Thread t = new Thread(this);
-	    t.start();
+            Thread t = new Thread(this);
+            t.start();
 
-	    clientTransceiver = new SaslSocketTransceiver(
-		    new InetSocketAddress(InetAddress.getByName(clientIP), clientPort));
-	    clientProxy = (ChatClientServer) SpecificRequestor.getClient(ChatClientServer.class, clientTransceiver);
+            clientTransceiver = new SaslSocketTransceiver(
+                    new InetSocketAddress(InetAddress.getByName(clientIP), clientPort));
+            clientProxy = (ChatClientServer) SpecificRequestor.getClient(ChatClientServer.class, clientTransceiver);
 
-	    ShellFactory.createConsoleShell("client", "", new ClientUI(this)).commandLoop();
+            ShellFactory.createConsoleShell("client", "", new ClientUI(this)).commandLoop();
 
-	    t.interrupt();
-	    serverProxy.leave(username);
-	    clientTransceiver.close();
-	    serverTransceiver.close();
-	} catch (IOException e) {
-	    System.err.println("client> Something went wrong when communicating with the server.");
-	    System.exit(1);
-	}
+            t.interrupt();
+            serverProxy.leave(username);
+            clientTransceiver.close();
+            serverTransceiver.close();
+        } catch (IOException e) {
+            System.err.println("client> Something went wrong when communicating with the server.");
+            System.exit(1);
+        }
     }
 
     /***
@@ -328,70 +328,70 @@ public class ChatClient implements ChatClientServer, Runnable {
      *            Number of recent failed attempts to reconnect to server.
      */
     private void reconnect(int n) {
-	try {
-	    if (n == 6) {
-		System.err.println("client> Failed to reconnect to server after " + n + " attempts.\n"
-			+ "client> Closing transceiver, you may try to connect to the server manually later.");
+        try {
+            if (n == 6) {
+                System.err.println("client> Failed to reconnect to server after " + n + " attempts.\n"
+                        + "client> Closing transceiver, you may try to connect to the server manually later.");
 
-		serverTransceiver.close();
-		return;
-	    } else {
-		System.err.println("client> Cannot access the server, trying to reconnect in " + n * 5 + " seconds.");
+                serverTransceiver.close();
+                return;
+            } else {
+                System.err.println("client> Cannot access the server, trying to reconnect in " + n * 5 + " seconds.");
 
-		Thread.sleep(n * 5000); // milliseconds
+                Thread.sleep(n * 5000); // milliseconds
 
-		serverSocket = new InetSocketAddress(InetAddress.getByName(serverIP), serverPort);
-		serverTransceiver = new SaslSocketTransceiver(serverSocket);
-		serverProxy = (Chat) SpecificRequestor.getClient(Chat.class, serverTransceiver);
+                serverSocket = new InetSocketAddress(InetAddress.getByName(serverIP), serverPort);
+                serverTransceiver = new SaslSocketTransceiver(serverSocket);
+                serverProxy = (Chat) SpecificRequestor.getClient(Chat.class, serverTransceiver);
 
-		serverProxy.isAlive();
-		serverProxy.register(username, clientIP, clientPort);
+                serverProxy.isAlive();
+                serverProxy.register(username, clientIP, clientPort);
 
-		System.out.println("Server is accessible again.");
-		return;
-	    }
-	} catch (ConnectException e) {
-	    reconnect(++n); // server is still offline
-	} catch (AvroRemoteException e) {
-	    reconnect(++n); // server is still offline
-	} catch (InterruptedException e) {
-	    e.printStackTrace(); // thread interrupted
-	} catch (IOException e) {
-	    e.printStackTrace(); // transceiver close
-	}
+                System.out.println("Server is accessible again.");
+                return;
+            }
+        } catch (ConnectException e) {
+            reconnect(++n); // server is still offline
+        } catch (AvroRemoteException e) {
+            reconnect(++n); // server is still offline
+        } catch (InterruptedException e) {
+            e.printStackTrace(); // thread interrupted
+        } catch (IOException e) {
+            e.printStackTrace(); // transceiver close
+        }
     }
 
     /***
      * Check if the server is still alive every 5 seconds.
      */
     private void checkServer() throws InterruptedException {
-	try {
-	    serverProxy.isAlive();
-	    Thread.sleep(5000); // milliseconds
-	} catch (AvroRemoteException e) {
-	    reconnect(1);
-	}
+        try {
+            serverProxy.isAlive();
+            Thread.sleep(5000); // milliseconds
+        } catch (AvroRemoteException e) {
+            reconnect(1);
+        }
     }
 
     /***
      * Check if the private user is still alive every 5 seconds.
      */
     private void checkPrivateUser() throws InterruptedException {
-	try {
-	    if (inPrivateRoom()) {
-		privateProxy.isAlive();
-		Thread.sleep(5000); // milliseconds
-	    }
-	} catch (AvroRemoteException e) {
-	    try {
-		leave(false);
-		String output = "client> The other user from this private room has gone offline.\n"
-			+ "client> You have been automatically disconnected.";
-		System.err.println(output);
-	    } catch (AvroRemoteException e1) {
-		e1.printStackTrace();
-	    }
-	}
+        try {
+            if (inPrivateRoom()) {
+                privateProxy.isAlive();
+                Thread.sleep(5000); // milliseconds
+            }
+        } catch (AvroRemoteException e) {
+            try {
+                leave(false);
+                String output = "client> The other user from this private room has gone offline.\n"
+                        + "client> You have been automatically disconnected.";
+                System.err.println(output);
+            } catch (AvroRemoteException e1) {
+                e1.printStackTrace();
+            }
+        }
     }
 
     /***
@@ -400,15 +400,15 @@ public class ChatClient implements ChatClientServer, Runnable {
      */
     @Override
     public void run() {
-	try {
-	    while (true) {
-		checkServer();
-		checkPrivateUser();
-	    }
-	} catch (InterruptedException e) {
-	    // This thread was interrupted, it needs to stop doing what it was
-	    // trying to do
-	}
+        try {
+            while (true) {
+                checkServer();
+                checkPrivateUser();
+            }
+        } catch (InterruptedException e) {
+            // This thread was interrupted, it needs to stop doing what it was
+            // trying to do
+        }
     }
 
     /***
@@ -420,17 +420,17 @@ public class ChatClient implements ChatClientServer, Runnable {
      *            CLI arguments which are passed to the configure function.
      */
     public static void main(String[] args) {
-	try {
-	    ChatClient chatClient = new ChatClient();
+        try {
+            ChatClient chatClient = new ChatClient();
 
-	    chatClient.configure(args);
-	    chatClient.startLocalServer();
-	    chatClient.connectToServer();
-	    chatClient.localServer.close();
-	} catch (Exception e) {
-	    // Client was abruptly terminated (for instance by pressing CTRL + D
-	    // in terminal after cliche interface was constructed).
-	    System.exit(1);
-	}
+            chatClient.configure(args);
+            chatClient.startLocalServer();
+            chatClient.connectToServer();
+            chatClient.localServer.close();
+        } catch (Exception e) {
+            // Client was abruptly terminated (for instance by pressing CTRL + D
+            // in terminal after cliche interface was constructed).
+            System.exit(1);
+        }
     }
 }

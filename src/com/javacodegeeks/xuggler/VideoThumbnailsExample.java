@@ -29,64 +29,64 @@ public class VideoThumbnailsExample {
 
     public static final double SECONDS_BETWEEN_FRAMES = 1.0;
     public static final long MICRO_SECONDS_BETWEEN_FRAMES = (long) (Global.DEFAULT_PTS_PER_SECOND
-	    * SECONDS_BETWEEN_FRAMES);
+            * SECONDS_BETWEEN_FRAMES);
 
     public static void main(String[] args) {
-	IMediaReader mediaReader = ToolFactory.makeReader(inputFilename);
+        IMediaReader mediaReader = ToolFactory.makeReader(inputFilename);
 
-	// stipulate that we want BufferedImages created in BGR 24bit color
-	// space
-	mediaReader.setBufferedImageTypeToGenerate(BufferedImage.TYPE_3BYTE_BGR);
+        // stipulate that we want BufferedImages created in BGR 24bit color
+        // space
+        mediaReader.setBufferedImageTypeToGenerate(BufferedImage.TYPE_3BYTE_BGR);
 
-	mediaReader.addListener(new ImageSnapListener());
+        mediaReader.addListener(new ImageSnapListener());
 
-	// read out the contents of the media file and
-	// dispatch events to the attached listener
-	while (mediaReader.readPacket() == null)
-	    ;
+        // read out the contents of the media file and
+        // dispatch events to the attached listener
+        while (mediaReader.readPacket() == null)
+            ;
     }
 
     private static class ImageSnapListener extends MediaListenerAdapter {
 
-	public void onVideoPicture(IVideoPictureEvent event) {
-	    if (event.getStreamIndex() != mVideoStreamIndex) {
-		// if the selected video stream id is not yet set, go ahead an
-		// select this lucky video stream
-		if (mVideoStreamIndex == -1)
-		    mVideoStreamIndex = event.getStreamIndex();
-		// no need to show frames from this video stream
-		else
-		    return;
-	    }
+        public void onVideoPicture(IVideoPictureEvent event) {
+            if (event.getStreamIndex() != mVideoStreamIndex) {
+                // if the selected video stream id is not yet set, go ahead an
+                // select this lucky video stream
+                if (mVideoStreamIndex == -1)
+                    mVideoStreamIndex = event.getStreamIndex();
+                // no need to show frames from this video stream
+                else
+                    return;
+            }
 
-	    // if uninitialized, back date mLastPtsWrite to get the very first
-	    // frame
-	    if (mLastPtsWrite == Global.NO_PTS)
-		mLastPtsWrite = event.getTimeStamp() - MICRO_SECONDS_BETWEEN_FRAMES;
+            // if uninitialized, back date mLastPtsWrite to get the very first
+            // frame
+            if (mLastPtsWrite == Global.NO_PTS)
+                mLastPtsWrite = event.getTimeStamp() - MICRO_SECONDS_BETWEEN_FRAMES;
 
-	    // if it's time to write the next frame
-	    if (event.getTimeStamp() - mLastPtsWrite >= MICRO_SECONDS_BETWEEN_FRAMES) {
-		String outputFilename = dumpImageToFile(event.getImage());
+            // if it's time to write the next frame
+            if (event.getTimeStamp() - mLastPtsWrite >= MICRO_SECONDS_BETWEEN_FRAMES) {
+                String outputFilename = dumpImageToFile(event.getImage());
 
-		// indicate file written
-		double seconds = ((double) event.getTimeStamp()) / Global.DEFAULT_PTS_PER_SECOND;
-		System.out.printf("at elapsed time of %6.3f seconds wrote: %s\n", seconds, outputFilename);
+                // indicate file written
+                double seconds = ((double) event.getTimeStamp()) / Global.DEFAULT_PTS_PER_SECOND;
+                System.out.printf("at elapsed time of %6.3f seconds wrote: %s\n", seconds, outputFilename);
 
-		// update last write time
-		mLastPtsWrite += MICRO_SECONDS_BETWEEN_FRAMES;
-	    }
+                // update last write time
+                mLastPtsWrite += MICRO_SECONDS_BETWEEN_FRAMES;
+            }
 
-	}
+        }
 
-	private String dumpImageToFile(BufferedImage image) {
-	    try {
-		String outputFilename = outputFilePrefix + System.currentTimeMillis() + ".png";
-		ImageIO.write(image, "png", new File(outputFilename));
-		return outputFilename;
-	    } catch (IOException e) {
-		e.printStackTrace();
-		return null;
-	    }
-	}
+        private String dumpImageToFile(BufferedImage image) {
+            try {
+                String outputFilename = outputFilePrefix + System.currentTimeMillis() + ".png";
+                ImageIO.write(image, "png", new File(outputFilename));
+                return outputFilename;
+            } catch (IOException e) {
+                e.printStackTrace();
+                return null;
+            }
+        }
     }
 }

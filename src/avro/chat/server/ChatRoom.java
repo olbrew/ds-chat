@@ -16,12 +16,12 @@ public class ChatRoom {
      * @return boolean Whether the user was added to the room or not.
      */
     public boolean join(String username) {
-	if (!clients.contains(username)) {
-	    clients.add(username);
-	    return true;
-	} else {
-	    return false;
-	}
+        if (!clients.contains(username)) {
+            clients.add(username);
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /***
@@ -33,11 +33,11 @@ public class ChatRoom {
      * @return boolean Whether the room contains the user.
      */
     public boolean contains(String username) {
-	if (clients.contains(username)) {
-	    return true;
-	} else {
-	    return false;
-	}
+        if (clients.contains(username)) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /***
@@ -47,7 +47,7 @@ public class ChatRoom {
      *            The nickname of the user.
      */
     public void leave(String username) {
-	clients.remove(username);
+        clients.remove(username);
     }
 
     /***
@@ -60,11 +60,11 @@ public class ChatRoom {
      *            The message of the user.
      */
     public void sendMessage(String username, String message) {
-	Hashtable<String, String> userMessage = new Hashtable<String, String>();
+        Hashtable<String, String> userMessage = new Hashtable<String, String>();
 
-	userMessage.put(username, message);
-	messages.add(userMessage);
+        userMessage.put(username, message);
+        messages.add(userMessage);
 
-	System.out.println(username + "> (Public): " + message);
+        System.out.println(username + "> (Public): " + message);
     }
 }
