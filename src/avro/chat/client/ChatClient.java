@@ -213,7 +213,7 @@ public class ChatClient implements ChatClientServer, Runnable {
      * 
      * This emulates push based (server side) communication.
      */
-    public void startLocalServer() {
+    private void startLocalServer() {
         try {
             localServer = new SaslSocketServer(new SpecificResponder(ChatClientServer.class, new ChatClient()),
                     new InetSocketAddress(clientPort));
@@ -236,7 +236,7 @@ public class ChatClient implements ChatClientServer, Runnable {
      *            The given command line arguments. Execute client with 'help'
      *            as argument to see the options.
      */
-    public void configure(String[] args) {
+    private void configure(String[] args) {
         // default values, override with command-line arguments
 
         // parse command line arguments
@@ -289,7 +289,7 @@ public class ChatClient implements ChatClientServer, Runnable {
      * Registers with the server, start the Cliche CLI and keep the connection
      * open until the client exits or the server is down for more than 60s.
      */
-    public void connectToServer() {
+    private void connectToServer() {
         try {
             serverSocket = new InetSocketAddress(InetAddress.getByName(serverIP), serverPort);
             serverTransceiver = new SaslSocketTransceiver(serverSocket);
