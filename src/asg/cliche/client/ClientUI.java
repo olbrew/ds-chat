@@ -65,7 +65,9 @@ public class ClientUI {
             @Param(name = "message", description = "The message you would like to send.") String message) {
         try {
             if (client.getClientProxy().inPrivateRoom()) {
-                client.getClientProxy().sendMessage(client.getUsername(), message);
+                String output = client.getUsername() + "> (Private): " + message;
+                client.getClientProxy().sendPrivateMessage(output);
+                System.out.println(output);
             } else {
                 String output = client.getServerProxy().sendMessage(client.getUsername(), message);
                 System.out.println(output);
@@ -75,43 +77,48 @@ public class ClientUI {
         }
     }
 
-    // @Command(description = "Tries to initiate videostreaming with help of
-    // RSVP.")
-    // public void video(@Param(name = "file", description = "The filename of
-    // the video to be transmitted.") String file) {
-    // try {
-    // if (client.getClientProxy().inPrivateRoom()) {
-    // String request = client.getUsername() + " would like to start
-    // videostreaming from his
-    // end.";
-    //
-    // boolean response = client.getServerProxy().sendVideoRequest(request,
-    // file);// =
-    // chatclient.getClientProxy().sendVideoRequest(request, file);
-    //
-    // if (response) {
-    // // TODO trigger rsvp.send_path handler
-    // String output = "server> The client has accepted your videostreaming
-    // request, sending RSVP PATH message.";
-    // System.out.println(output);
-    // } else {
-    // String output = "server> The client declined your videostreaming
-    // request.";
-    // System.out.println(output);
-    // }
-    // } else {
-    // String output = "server> You are currently not part of any private
-    // rooms.\n"
-    // + "server> Use `join client.getUsername()` before initiating
-    // videostream.";
-    // System.err.println(output);
-    // }
-    // } catch (AvroRemoteException e) {
-    // System.err.println("server> Failed to receive answer from the server.");
-    // }
-    // }
+    @Command(description = "Tries to initiate video streaming with the help of RSVP.")
+    public void video() {
+        try {
+            if (client.getClientProxy().inPrivateRoom()) {
+                String request = "client> " + client.getUsername() + " would like to start video streaming.\n"
+                        + "client> Use 'accept' to initiate the video streaming.";
+                client.getClientProxy().sendPrivateMessage(request);
+                client.getClientProxy().video(true);
+            } else {
+                String output = "server> You are currently not connected to any private room.\n"
+                        + "server> Use `join username` before initiating video streaming.";
+                System.err.println(output);
+            }
+        } catch (AvroRemoteException e) {
+            System.err.println("client> Something went wrong using client proxy when requesting video streaming.");
+        }
+    }
 
-    @Command(description = "Accept private chat requests")
+    @Command(description = "Accept video requests.")
+    public void accept() {
+        try {
+            if (client.getClientProxy().inPrivateRoom()) {
+                if (client.getClientProxy().isAwaitingVideo()) {
+                    // TODO trigger rsvp.send_path handler
+                    String output = "The client has accepted your video streaming request.";
+                    client.getClientProxy().sendPrivateMessage(output);
+                } else {
+                    String output = "client> You don't have any video streaming requests yet.\n"
+                            + "client> You can request to send your own video by using 'video'.";
+                    System.out.println(output);
+                }
+            } else {
+                String output = "client> You're not in a private room yet.\n"
+                        + "client> Connect to one by using 'join username'.";
+                System.out.println(output);
+            }
+        } catch (AvroRemoteException e) {
+            System.err.println("client> Something went wrong using client proxy when accepting video streaming.");
+        }
+    }
+
+    @Command(description = "Accept private chat requests.")
     public void accept(
             @Param(name = "chatPartner", description = "The person whose request you would like to accept.") String chatPartner) {
         try {

@@ -14,13 +14,16 @@
       "request" : [{"name" : "message", "type" : "string"}],
       "response" : "null"
     },
-    "sendMessage" : {
-      "request" : [{"name" : "senderName", "type" : "string"},
-      				{"name" : "message", "type" : "string"}],
+    "sendPrivateMessage" : {
+      "request" : [{"name" : "senderName", "type" : "string"}],
       "response" : "null"
     },
-    "sendVideoRequest" : {
-      "request" : [{"name" : "file", "type" : "string"}],
+    "video" : {
+      "request" : [{"name" : "privateProxy", "type" : "boolean"}],
+      "response" : "null"
+    },
+    "isAwaitingVideo" : {
+      "request" : [],
       "response" : "boolean"
     },
     "register" : {

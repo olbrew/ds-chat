@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.util.Scanner;
 
 import org.apache.avro.AvroRemoteException;
 import org.apache.avro.ipc.SaslSocketServer;
@@ -39,6 +38,7 @@ public class ChatClient implements ChatClientServer, Runnable {
     // Other client connected to us
     Transceiver privateTransceiver = null;
     ChatClientServer privateProxy = null;
+    boolean awaitingVideo = false;
 
     /** Getters **/
     public Chat getServerProxy() {
@@ -54,6 +54,18 @@ public class ChatClient implements ChatClientServer, Runnable {
     }
 
     /** Proxy methods **/
+    /***
+     * Simple method to test if the client received a video streaming request.
+     *
+     * @return boolean Whether or not a prior video request was received.
+     *
+     * @throws AvroRemoteException
+     */
+    @Override
+    public boolean isAwaitingVideo() throws AvroRemoteException {
+        return awaitingVideo;
+    }
+
     /***
      * Simple method to test if the client is still alive.
      *
@@ -110,34 +122,30 @@ public class ChatClient implements ChatClientServer, Runnable {
      * @throws AvroRemoteException
      */
     @Override
-    public Void sendMessage(String senderName, String message) throws AvroRemoteException {
-        System.out.println(senderName + "> (Private): " + message);
-        privateProxy.incomingMessage(senderName + "> (Private): " + message);
-
+    public Void sendPrivateMessage(String message) throws AvroRemoteException {
+        privateProxy.incomingMessage(message);
         return null;
     }
 
     /***
-     * Allows videostreaming to be intitiated between two clients.
+     * Requests videostreaming.
      *
-     * @param file
-     *            The video file to be transmitted.
-     *
-     * @return boolean Binary client answer to the request
-     *
+     * @param privateProxy
+     *            Allows to switch between the proxies of both clients to
+     *            prevent extra method.
+     * 
      * @throws AvroRemoteException
      */
     @Override
-    public boolean sendVideoRequest(String file) throws AvroRemoteException {
-        Scanner reader = new Scanner(System.in);
-        System.out.println("Enter and then type 'y' to accept or 'n' to decline.");
-        if (reader.hasNext("y")) {
-            reader.close();
-            return true;
+    public Void video(boolean privateProxy) throws AvroRemoteException {
+        if (privateProxy) {
+            this.privateProxy.video(false);
+            System.out.println("client> A video request has been sent to the other client.");
         } else {
-            reader.close();
-            return false;
+            awaitingVideo = true;
         }
+
+        return null;
     }
 
     /***
@@ -165,6 +173,7 @@ public class ChatClient implements ChatClientServer, Runnable {
 
             return true;
         } catch (IOException e) {
+            e.printStackTrace();
             return false;
         }
     }
