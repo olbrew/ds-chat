@@ -17,6 +17,8 @@ import asg.cliche.ShellFactory;
 import asg.cliche.client.ClientUI;
 import avro.chat.proto.Chat;
 import avro.chat.proto.ChatClientServer;
+import xuggler.VideoReceiverThread;
+import xuggler.VideoSenderThread;
 
 public class ChatClient implements ChatClientServer, Runnable {
     /** Fields **/
@@ -38,7 +40,11 @@ public class ChatClient implements ChatClientServer, Runnable {
     // Other client connected to us
     Transceiver privateTransceiver = null;
     ChatClientServer privateProxy = null;
+
+    // Video streaming related attributes
     boolean awaitingVideo = false;
+    VideoSenderThread videoSender;
+    VideoReceiverThread videoReceiver;
 
     /** Getters **/
     public Chat getServerProxy() {
@@ -128,7 +134,7 @@ public class ChatClient implements ChatClientServer, Runnable {
     }
 
     /***
-     * Requests videostreaming.
+     * Requests video streaming.
      *
      * @param privateProxy
      *            Allows to switch between the proxies of both clients to
@@ -137,12 +143,47 @@ public class ChatClient implements ChatClientServer, Runnable {
      * @throws AvroRemoteException
      */
     @Override
-    public Void video(boolean privateProxy) throws AvroRemoteException {
+    public Void setupVideoRequest(boolean privateProxy) throws AvroRemoteException {
         if (privateProxy) {
-            this.privateProxy.video(false);
+            this.privateProxy.setupVideoRequest(false);
             System.out.println("client> A video request has been sent to the other client.");
         } else {
             awaitingVideo = true;
+        }
+
+        return null;
+    }
+
+    /***
+     * Initiates video streaming.
+     *
+     * @param privateProxy
+     *            Allows to switch between the proxies of both clients to
+     *            prevent extra method.
+     * 
+     * @throws AvroRemoteException
+     */
+    @Override
+    public Void setupVideoStreaming(boolean privateProxy) throws AvroRemoteException {
+        if (privateProxy) { // Sender
+            try {
+                String privateIP = privateTransceiver.getRemoteName().split(":")[0].substring(1);
+
+                // TODO get listen port from program arguments
+                videoSender = new VideoSenderThread(privateIP, 3333);
+                videoSender.start();
+                System.out.println("Sender thread started.");
+            } catch (IOException e) {
+                System.err.println("client> Failed getting remote name from private transceiver.");
+            }
+        } else { // Receiver
+            // TODO get listen port from program arguments
+            videoReceiver = new VideoReceiverThread(3333);
+            videoReceiver.start();
+            System.out.println("Receiver thread started.");
+
+            // Create the sender thread
+            this.privateProxy.setupVideoStreaming(true);
         }
 
         return null;

@@ -6,8 +6,10 @@
 package com.javacodegeeks.xuggler;
 
 import java.awt.image.BufferedImage;
-import java.io.File;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.ByteBuffer;
 
 import javax.imageio.ImageIO;
 
@@ -18,27 +20,25 @@ import com.xuggle.mediatool.event.IVideoPictureEvent;
 import com.xuggle.xuggler.Global;
 
 public class VideoThumbnailsExample {
-
     // The video stream index, used to ensure we display frames from one and
     // only one video stream from the media container.
     private static int mVideoStreamIndex = -1;
     // Time of last frame write
     private static long mLastPtsWrite = Global.NO_PTS;
-    private static final String inputFilename = "../resources/videos/sample_1080x720_1mb.mp4";
-    private static final String outputFilePrefix = "../resources/images/";
+    private static final String inputFilename = "../resources/videos/sender_1080x720_1mb.mp4";
 
-    public static final double SECONDS_BETWEEN_FRAMES = 1.0;
+    public static final double SECONDS_BETWEEN_FRAMES = 1.0/25.0;
     public static final long MICRO_SECONDS_BETWEEN_FRAMES = (long) (Global.DEFAULT_PTS_PER_SECOND
             * SECONDS_BETWEEN_FRAMES);
 
-    public static void main(String[] args) {
+    public void start(OutputStream os) {
         IMediaReader mediaReader = ToolFactory.makeReader(inputFilename);
 
         // stipulate that we want BufferedImages created in BGR 24bit color
         // space
         mediaReader.setBufferedImageTypeToGenerate(BufferedImage.TYPE_3BYTE_BGR);
 
-        mediaReader.addListener(new ImageSnapListener());
+        mediaReader.addListener(new ImageSnapListener(os));
 
         // read out the contents of the media file and
         // dispatch events to the attached listener
@@ -47,6 +47,11 @@ public class VideoThumbnailsExample {
     }
 
     private static class ImageSnapListener extends MediaListenerAdapter {
+        private OutputStream os;
+
+        public ImageSnapListener(OutputStream output) {
+            os = output;
+        }
 
         public void onVideoPicture(IVideoPictureEvent event) {
             if (event.getStreamIndex() != mVideoStreamIndex) {
@@ -66,11 +71,7 @@ public class VideoThumbnailsExample {
 
             // if it's time to write the next frame
             if (event.getTimeStamp() - mLastPtsWrite >= MICRO_SECONDS_BETWEEN_FRAMES) {
-                String outputFilename = dumpImageToFile(event.getImage());
-
-                // indicate file written
-                double seconds = ((double) event.getTimeStamp()) / Global.DEFAULT_PTS_PER_SECOND;
-                System.out.printf("at elapsed time of %6.3f seconds wrote: %s\n", seconds, outputFilename);
+                sendImageToOutputStream(event.getImage());
 
                 // update last write time
                 mLastPtsWrite += MICRO_SECONDS_BETWEEN_FRAMES;
@@ -78,14 +79,17 @@ public class VideoThumbnailsExample {
 
         }
 
-        private String dumpImageToFile(BufferedImage image) {
+        private void sendImageToOutputStream(BufferedImage image) {
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
             try {
-                String outputFilename = outputFilePrefix + System.currentTimeMillis() + ".png";
-                ImageIO.write(image, "png", new File(outputFilename));
-                return outputFilename;
+                ImageIO.write(image, "jpg", byteArrayOutputStream);
+                byte[] size = ByteBuffer.allocate(4).putInt(byteArrayOutputStream.size()).array();
+                os.write(size);
+                os.write(byteArrayOutputStream.toByteArray());
+                os.flush();
+                System.out.println("Flushed: " + System.currentTimeMillis());
             } catch (IOException e) {
                 e.printStackTrace();
-                return null;
             }
         }
     }

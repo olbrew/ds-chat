@@ -18,7 +18,11 @@
       "request" : [{"name" : "senderName", "type" : "string"}],
       "response" : "null"
     },
-    "video" : {
+    "setupVideoRequest" : {
+      "request" : [{"name" : "privateProxy", "type" : "boolean"}],
+      "response" : "null"
+    },
+    "setupVideoStreaming" : {
       "request" : [{"name" : "privateProxy", "type" : "boolean"}],
       "response" : "null"
     },

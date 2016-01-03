@@ -10,6 +10,7 @@ public class ClientUI {
     ChatClient client;
 
     public ClientUI(ChatClient cl) {
+        // private proxy is always null, since this is a copy of original object
         client = cl;
     }
 
@@ -84,7 +85,7 @@ public class ClientUI {
                 String request = "client> " + client.getUsername() + " would like to start video streaming.\n"
                         + "client> Use 'accept' to initiate the video streaming.";
                 client.getClientProxy().sendPrivateMessage(request);
-                client.getClientProxy().video(true);
+                client.getClientProxy().setupVideoRequest(true);
             } else {
                 String output = "server> You are currently not connected to any private room.\n"
                         + "server> Use `join username` before initiating video streaming.";
@@ -103,6 +104,8 @@ public class ClientUI {
                     // TODO trigger rsvp.send_path handler
                     String output = "The client has accepted your video streaming request.";
                     client.getClientProxy().sendPrivateMessage(output);
+                    client.getClientProxy().setupVideoStreaming(false);
+                    System.out.println("client> You've accepted the video streaming request, enjoy!");
                 } else {
                     String output = "client> You don't have any video streaming requests yet.\n"
                             + "client> You can request to send your own video by using 'video'.";
