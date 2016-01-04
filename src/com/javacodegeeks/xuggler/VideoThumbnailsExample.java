@@ -25,7 +25,7 @@ public class VideoThumbnailsExample {
 	private static int mVideoStreamIndex = -1;
 	// Time of last frame write
 	private static long mLastPtsWrite = Global.NO_PTS;
-	private static final String inputFilename = "../resources/videos/sender_1080x720_1mb.mp4";
+	private static final String inputFilename = "./resources/videos/sender_1080x720_1mb.mp4";
 
 	public static final double SECONDS_BETWEEN_FRAMES = 10.0 / 25.0;
 	public static final long MICRO_SECONDS_BETWEEN_FRAMES = (long) (Global.DEFAULT_PTS_PER_SECOND
@@ -90,7 +90,11 @@ public class VideoThumbnailsExample {
 				os.write(size);
 				os.write(byteArrayOutputStream.toByteArray());
 				os.flush();
+				Thread.sleep(40);
 			} catch (IOException e) {
+				e.printStackTrace();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}

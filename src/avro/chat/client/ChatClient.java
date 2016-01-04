@@ -173,7 +173,6 @@ public class ChatClient implements ChatClientServer, Runnable {
 				String privateIP = privateTransceiver.getRemoteName()
 						.split(":")[0].substring(1);
 
-				// TODO get listen port from program arguments
 				videoSender = new VideoSenderThread(privateIP, 3333);
 				videoSender.start();
 				System.out.println("Sender thread started.");
@@ -182,7 +181,6 @@ public class ChatClient implements ChatClientServer, Runnable {
 						"client> Failed getting remote name from private transceiver.");
 			}
 		} else { // Receiver
-			// TODO get listen port from program arguments
 			videoReceiver = new VideoReceiverThread(3333);
 			videoReceiver.start();
 			System.out.println("Receiver thread started.");

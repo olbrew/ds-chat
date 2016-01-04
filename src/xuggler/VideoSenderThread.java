@@ -26,10 +26,20 @@ public class VideoSenderThread implements Runnable {
 	@Override
 	public void run() {
 		(new VideoThumbnailsExample()).start(os);
-		System.out
-				.println("client> The frames have been sent to the recipient!");
+		System.out.println("client> The frames have been sent to the recipient!");
+		close();
 	}
 
+	public void close() {
+		try {
+			os.close();
+			videoSenderSocket.close();
+			System.out.println("client> Sender's video sockets closed.");
+		} catch (IOException e) {
+			System.err.println("client> Failed closing sender's video sockets.");
+		}
+	}
+	
 	/***
 	 * Creates a thread if needed and starts it.
 	 */
