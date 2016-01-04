@@ -25,7 +25,10 @@ public class VideoSenderThread implements Runnable {
 
 	@Override
 	public void run() {
-		(new VideoThumbnailsExample()).start(os);
+//		(new VideoThumbnailsExample()).start(os);
+		
+		DecodeAndCaptureFrames decoder = new DecodeAndCaptureFrames("./resources/videos/sender_1080x720_1mb.mp4");
+		
 		System.out.println("client> The frames have been sent to the recipient!");
 		close();
 	}

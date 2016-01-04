@@ -34,6 +34,8 @@ public class VideoReceiverThread implements Runnable {
 			return;
 		}
 
+		DecodeAndPlayVideo player = new DecodeAndPlayVideo();
+		
 		try {
 			while (true) {
 				// Read the frames from the socket
@@ -50,9 +52,10 @@ public class VideoReceiverThread implements Runnable {
 					BufferedImage image = ImageIO
 							.read(new ByteArrayInputStream(imageAr));
 
-					long ms = System.currentTimeMillis();
-					ImageIO.write(image, "jpg", new File(
-							"./resources/images/receiver_" + ms + ".jpg"));
+					
+//					long ms = System.currentTimeMillis();
+//					ImageIO.write(image, "jpg", new File(
+//							"./resources/images/receiver_" + ms + ".jpg"));
 
 					// TODO display received frames instead of saving them
 				}
