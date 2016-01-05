@@ -14,6 +14,10 @@
       "request" : [{"name" : "message", "type" : "string"}],
       "response" : "null"
     },
+    "incomingFrame" : {
+      "request" : [{"name" : "frame", "type" : "bytes"}],
+      "response" : "null"
+    },
     "sendPrivateMessage" : {
       "request" : [{"name" : "senderName", "type" : "string"}],
       "response" : "null"
@@ -23,7 +27,7 @@
       "response" : "null"
     },
     "setupVideoStreaming" : {
-      "request" : [{"name" : "privateProxy", "type" : "boolean"}],
+	  "request" : [{"name" : "privateProxy", "type" : "boolean"}],
       "response" : "null"
     },
     "isAwaitingVideo" : {

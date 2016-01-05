@@ -1,66 +1,33 @@
 package xuggler;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.net.InetAddress;
-import java.net.Socket;
-import java.net.UnknownHostException;
-import com.javacodegeeks.xuggler.VideoThumbnailsExample;
+import xuggler.VideoDecoder;
+import avro.chat.proto.ChatClientServer;
 
 public class VideoSenderThread implements Runnable {
-	private Thread t;
-	private InetAddress receiverIPAddress;
-	private int receiverPort;
-	private Socket videoSenderSocket;
-	private OutputStream os;
+    private Thread t;
+    ChatClientServer privateProxy;
 
-	public VideoSenderThread(String ip, int port) {
-		try {
-			receiverIPAddress = InetAddress.getByName(ip);
-			receiverPort = port;
-		} catch (UnknownHostException e) {
-			System.err.println("client> Unknown remote host address.");
-		}
-	}
+    public VideoSenderThread(ChatClientServer proxy) {
+        privateProxy = proxy;
+    }
 
-	@Override
-	public void run() {
-//		(new VideoThumbnailsExample()).start(os);
-		
-		DecodeAndCaptureFrames decoder = new DecodeAndCaptureFrames("./resources/videos/sender_1080x720_1mb.mp4");
-		
-		System.out.println("client> The frames have been sent to the recipient!");
-		close();
-	}
+    @Override
+    public void run() {
+        (new VideoDecoder()).start(privateProxy);
 
-	public void close() {
-		try {
-			os.close();
-			videoSenderSocket.close();
-			System.out.println("client> Sender's video sockets closed.");
-		} catch (IOException e) {
-			System.err.println("client> Failed closing sender's video sockets.");
-		}
-	}
-	
-	/***
-	 * Creates a thread if needed and starts it.
-	 */
-	public void start() {
-		if (t == null) {
-			t = new Thread(this);
-		}
+        System.out.println("client> The frames have been sent to the recipient!");
+    }
 
-		try {
-			videoSenderSocket = new Socket(receiverIPAddress, receiverPort);
-			os = videoSenderSocket.getOutputStream();
+    /***
+     * Creates a thread if needed and starts it.
+     */
+    public void start() {
+        if (t == null) {
+            t = new Thread(this);
+        }
 
-			// TODO determine whether t needs to sleep so Receiver can
-			// setup its socket properly (test for intermittent error)
-			t.start();
-		} catch (IOException e) {
-			System.err.println(
-					"client> Failed creating private sender socket for video streaming.");
-		}
-	}
+        // TODO determine whether t needs to sleep so Receiver can
+        // setup its socket properly (test for intermittent error)
+        t.start();
+    }
 }
