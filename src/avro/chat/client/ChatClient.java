@@ -43,14 +43,14 @@ public class ChatClient implements ChatClientServer, Runnable {
 	ChatClientServer clientProxy;
 
 	// Other client connected to us
-	Transceiver privateTransceiver = null;
-	ChatClientServer privateProxy = null;
+	Transceiver privateTransceiver;
+	ChatClientServer privateProxy;
 
 	// Video streaming related attributes
 	boolean awaitingVideo = false;
 	VideoSenderThread videoSender;
 	// VideoReceiverThread videoReceiver;
-	VideoImage player = null;
+	VideoImage player;
 
 	/** Getters **/
 	public Chat getServerProxy() {
@@ -107,12 +107,12 @@ public class ChatClient implements ChatClientServer, Runnable {
 				return false;
 			}
 		} catch (AvroRemoteException e) {
-			privateProxy = null;
-
 			if (videoSender != null) {
 				videoSender.stop();
 				videoSender = null;
 			}
+
+			privateProxy = null;
 
 			leave(false);
 			String output = "client> The other user from this private room has gone offline.\n"
@@ -274,16 +274,25 @@ public class ChatClient implements ChatClientServer, Runnable {
 	@Override
 	public Void leave(boolean closeOtherProxy) throws AvroRemoteException {
 		if (closeOtherProxy) {
+			if (videoSender != null) {
+				videoSender.stop();
+				videoSender = null;
+			}
+			
 			privateProxy.leave(false);
-		}
-		try {
 			privateProxy = null;
-			privateTransceiver.close();
-			System.out.println(
-					"client> You have left the private chat.\n" + "client> You can 'join' a new one now if you want.");
-		} catch (IOException e) {
-			e.printStackTrace();
 		}
+
+		if (videoSender != null) {
+			videoSender.stop();
+			videoSender = null;
+		}
+		
+		privateProxy = null;
+		// privateTransceiver.close();
+		System.out.println(
+				"client> You have left the private chat.\n" + "client> You can 'join' a new one now if you want.");
+
 		return null;
 	}
 
@@ -391,17 +400,21 @@ public class ChatClient implements ChatClientServer, Runnable {
 				System.exit(1);
 			}
 
-			Thread t = new Thread(this);
-			t.start();
-
 			clientTransceiver = new SaslSocketTransceiver(
 					new InetSocketAddress(InetAddress.getByName(clientIP), clientPort));
 			clientProxy = (ChatClientServer) SpecificRequestor.getClient(ChatClientServer.class, clientTransceiver);
 
+			Thread t = new Thread(this);
+			t.start();
+
 			ShellFactory.createConsoleShell("client", "", new ClientUI(this)).commandLoop();
 
 			t.interrupt();
-			privateTransceiver.close();
+
+			if (privateProxy != null) {
+				privateProxy.leave(true);
+			}
+
 			serverProxy.leave(username);
 			serverTransceiver.close();
 			clientTransceiver.close();
@@ -458,7 +471,6 @@ public class ChatClient implements ChatClientServer, Runnable {
 	private void checkServer() throws InterruptedException {
 		try {
 			serverProxy.isAlive();
-			Thread.sleep(5000); // milliseconds
 		} catch (AvroRemoteException e) {
 			reconnect(1);
 		}
@@ -469,9 +481,7 @@ public class ChatClient implements ChatClientServer, Runnable {
 	 */
 	private void checkPrivateUser() throws InterruptedException {
 		try {
-			if (inPrivateRoom()) {
-				Thread.sleep(5000); // milliseconds
-			}
+			getClientProxy().inPrivateRoom();
 		} catch (AvroRemoteException e) {
 			e.printStackTrace();
 		}
@@ -487,6 +497,7 @@ public class ChatClient implements ChatClientServer, Runnable {
 			while (true) {
 				checkServer();
 				checkPrivateUser();
+				Thread.sleep(5000); // milliseconds
 			}
 		} catch (InterruptedException e) {
 			// This thread was interrupted, it needs to stop doing what it was

@@ -21,7 +21,7 @@ public class VideoSenderThread implements Runnable {
         try {
 			privateProxy.stopVideoStream();
 		} catch (AvroRemoteException e) {
-			System.err.println("bad private proxy");
+			System.err.println("VideoSenderThread: bad private proxy");
 		}
     }
 
