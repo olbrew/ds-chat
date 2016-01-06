@@ -227,7 +227,6 @@ public class ChatClient implements ChatClientServer, Runnable {
 		} else { // Receiver
 			this.privateProxy.setupVideoStreaming(true);
 		}
-
 		return null;
 	}
 
