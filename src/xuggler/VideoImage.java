@@ -39,6 +39,7 @@ import javax.swing.SwingUtilities;
  * @author aclarke
  *
  */
+@SuppressWarnings("serial")
 public class VideoImage extends JFrame
 {
 
@@ -46,7 +47,6 @@ public class VideoImage extends JFrame
    * To avoid a warning... 
    */
 
-  private static final long serialVersionUID = -4752966848100689153L;
   private final ImageComponent mOnscreenPicture;
 
 
@@ -69,12 +69,11 @@ public class VideoImage extends JFrame
     mOnscreenPicture.setImage(aImage);
   }
 
-  public class ImageComponent extends JComponent
+public class ImageComponent extends JComponent
   {
     /**
      * yeah... good idea to add this.
      */
-    private static final long serialVersionUID = 5584422798735147930L;
     private Image mImage;
     private Dimension mSize;
 

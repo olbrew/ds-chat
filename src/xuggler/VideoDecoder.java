@@ -12,6 +12,8 @@ import java.nio.ByteBuffer;
 
 import javax.imageio.ImageIO;
 
+import org.apache.avro.AvroRemoteException;
+
 import com.xuggle.mediatool.IMediaReader;
 import com.xuggle.mediatool.MediaListenerAdapter;
 import com.xuggle.mediatool.ToolFactory;
@@ -72,9 +74,9 @@ public class VideoDecoder {
                 ByteBuffer frame = ByteBuffer.wrap(baos.toByteArray());
 
                 privateProxy.incomingFrame(frame);
-
-                // Thread.sleep(40);
-            } catch (IOException e) {
+            }  catch (AvroRemoteException e) {
+            	System.err.println("bad private proxy");
+    		} catch (IOException e) {
                 e.printStackTrace();
             }
         }
