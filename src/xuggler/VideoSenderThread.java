@@ -1,6 +1,9 @@
 package xuggler;
 
 import xuggler.VideoDecoder;
+
+import org.apache.avro.AvroRemoteException;
+
 import avro.chat.proto.ChatClientServer;
 
 public class VideoSenderThread implements Runnable {
@@ -14,8 +17,12 @@ public class VideoSenderThread implements Runnable {
     @Override
     public void run() {
         (new VideoDecoder()).start(privateProxy);
-
-        System.out.println("client> The frames have been sent to the recipient!");
+        
+        try {
+			privateProxy.stopVideoStream();
+		} catch (AvroRemoteException e) {
+			System.err.println("bad private proxy");
+		}
     }
 
     /***

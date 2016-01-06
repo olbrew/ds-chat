@@ -18,6 +18,10 @@
       "request" : [{"name" : "frame", "type" : "bytes"}],
       "response" : "null"
     },
+    "stopVideoStream" : {
+      "request" : [],
+      "response" : "null"
+    },
     "sendPrivateMessage" : {
       "request" : [{"name" : "senderName", "type" : "string"}],
       "response" : "null"

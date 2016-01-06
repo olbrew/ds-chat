@@ -138,11 +138,12 @@ public class ChatClient implements ChatClientServer, Runnable {
     @Override
     public Void incomingFrame(ByteBuffer frame) throws AvroRemoteException {
         try {
-            BufferedImage image = ImageIO.read(new ByteArrayInputStream(frame.array()));
-
             if (player == null) {
+            	awaitingVideo = false;
                 player = new VideoImage();
             }
+            
+            BufferedImage image = ImageIO.read(new ByteArrayInputStream(frame.array()));
             player.setImage(image);
         } catch (IOException e) {
             e.printStackTrace();
@@ -150,7 +151,21 @@ public class ChatClient implements ChatClientServer, Runnable {
 
         return null;
     }
-
+    
+    /***
+     * Notifies the client that video stream has ended. 
+     *
+     * @throws AvroRemoteException
+     */
+    @Override
+    public Void stopVideoStream() throws AvroRemoteException {
+    	if (player != null) {
+	    	player.dispose();
+	    	player = null;
+    	}
+        return null;
+    }
+    
     /***
      * Allows a client to send a message to private room.
      * 
