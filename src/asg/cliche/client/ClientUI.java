@@ -106,8 +106,12 @@ public class ClientUI {
                     // TODO trigger rsvp.send_path handler
                     String output = "The client has accepted your video streaming request.";
                     client.getClientProxy().sendPrivateMessage(output);
+                    
+                    // set up videostream: sender -> receiver
                     client.getClientProxy().setupVideoStreaming(false);
-                    System.out.println("client> You've accepted the video streaming request, enjoy!");
+                    
+                    // set up videostream: receiver -> sender
+                    client.getClientProxy().setupVideoStreaming(true);
                 } else {
                     String output = "client> You don't have any video streaming requests yet.\n"
                             + "client> You can request to send your own video by using 'video'.";
@@ -119,7 +123,7 @@ public class ClientUI {
                 System.out.println(output);
             }
         } catch (AvroRemoteException e) {
-            System.err.println("client> Something went wrong using client proxy when accepting video streaming.");
+            System.err.println("client> Something went wrong with the client proxy when accepting video streaming.");
         }
     }
 

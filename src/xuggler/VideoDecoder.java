@@ -25,8 +25,8 @@ import avro.chat.proto.ChatClientServer;
 public class VideoDecoder {
 	// Time of last frame write
 	private static long mLastPtsWrite = Global.NO_PTS;
-	private static final String inputFilename = "./resources/videos/BigBuckBunny_320x180.mp4";
-	public static final double SECONDS_BETWEEN_FRAMES = 1.0 / 25.0;
+	private static final String inputFilename = "./resources/videos/BigBuckBunny.mp4";
+	public static final double SECONDS_BETWEEN_FRAMES = 1.0 / 24.0;
 	public static final long MICRO_SECONDS_BETWEEN_FRAMES = (long) (Global.DEFAULT_PTS_PER_SECOND
 			* SECONDS_BETWEEN_FRAMES);
 	public static ChatClientServer privateProxy;
@@ -72,7 +72,6 @@ public class VideoDecoder {
 				ImageIO.write(image, "png", baos);
 				baos.flush();
 				ByteBuffer frame = ByteBuffer.wrap(baos.toByteArray());
-				System.out.println("Frame size " + baos.toByteArray().length + " bytes");
 				privateProxy.incomingFrame(frame);
 
 				Thread.sleep(40);
