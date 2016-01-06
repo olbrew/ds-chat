@@ -33,8 +33,13 @@ public class VideoSenderThread implements Runnable {
             t = new Thread(this);
         }
 
-        // TODO determine whether t needs to sleep so Receiver can
-        // setup its socket properly (test for intermittent error)
         t.start();
+    }
+    
+    /***
+     * Interrupts the thread.
+     */
+    public void stop() {
+        t.interrupt();
     }
 }
