@@ -228,6 +228,7 @@ public class ChatClient implements ChatClientServer, Runnable {
 		} else { // Receiver
 			this.privateProxy.setupVideoStreaming(true);
 		}
+		
 		return null;
 	}
 
@@ -275,12 +276,6 @@ public class ChatClient implements ChatClientServer, Runnable {
 	public Void leave(boolean closeOtherProxy) throws AvroRemoteException {
 		if (closeOtherProxy) {
 			privateProxy.leave(false);
-
-			try {
-                privateTransceiver.close();
-            } catch (IOException e) {
-                // the other client is already offline
-            }
 		}
 
 		if (videoSender != null) {
@@ -289,6 +284,12 @@ public class ChatClient implements ChatClientServer, Runnable {
 		}
 		
 		privateProxy = null;
+        try {
+            privateTransceiver.close();
+        } catch (IOException e) {
+            // the other client is already offline
+        }
+        
 		System.out.println(
 				"client> You have left the private chat.\n" + "client> You can 'join' a new one now if you want.");
 
