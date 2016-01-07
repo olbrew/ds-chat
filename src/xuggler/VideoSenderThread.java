@@ -45,6 +45,6 @@ public class VideoSenderThread implements Runnable {
      */
     public void stop() {
         decoder.updateProxy(null);
-        t.interrupt();
+        //t.interrupt();
     }
 }

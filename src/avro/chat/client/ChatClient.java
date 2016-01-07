@@ -108,11 +108,6 @@ public class ChatClient implements ChatClientServer, Runnable {
 				return false;
 			}
 		} catch (AvroRemoteException e) {
-			if (videoSender != null) {
-				videoSender.stop();
-				videoSender = null;
-			}
-
 			privateProxy = null;
 
 			leave(false);
