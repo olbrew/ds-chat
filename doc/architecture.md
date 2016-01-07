@@ -44,16 +44,26 @@ request from the requesting user.
 
 Threads
 -------
-Because we run almost everything in threads (is this true?) we must take care
+Because we run almost everything in threads we must take care
 to keep our code thread safe. For example we use a `HashTable` instead of
 `HashMap` because it's synchronized.
 We periodically (every 5s) check if all connected clients are still alive on
-the server-side via the `user.isAlive()` check. This check runs in a separate
-thread. (why exactly?)
+the server-side via the `user.isAlive()` check. This loop runs in a separate
+thread so the server won't hang and would be able to accept new clients and
+handle their requests. Same applies to the individual clients that need to
+check whether the server is still alive or even their chat partner in case
+they are in a private chat room. Threads also allow us to send messages,
+both to the server and our chat partner, while we're video streaming.
 
 Video
 -----
-<!--- TODO -->
+We've used Xuggler library to decode separate frames of the video. These
+frames / images are then transferred as bytes over already existing
+Avro proxy that was setup between the clients. The receiver transforms
+these bytes back to an image and displays it on a Swing window. Since
+the idea is to mimic a real video chat, we send the same video in both
+directions at the same time. Once either party decides to stop the video,
+both clients will halt sending further frames.
 
 Integration with RSVP Click Project
 -----------------------------------
