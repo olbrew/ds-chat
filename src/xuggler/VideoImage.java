@@ -62,9 +62,7 @@ public class VideoImage extends JFrame {
         this.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-                setVisible(false);
-                dispose();
+                close();
                 
                 try {
                     privateProxy.stopVideoStream();
@@ -77,6 +75,12 @@ public class VideoImage extends JFrame {
 
     public void setImage(final BufferedImage image) {
         mOnscreenPicture.setImage(image);
+    }
+    
+    public void close() {
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setVisible(false);
+        dispose();
     }
 
     public class ImageComponent extends JComponent {

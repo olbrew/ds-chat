@@ -114,7 +114,9 @@ public class ChatClient implements ChatClientServer, Runnable {
 				return false;
 			}
 		} catch (AvroRemoteException e) {
-			privateProxy = null;
+            closeVideo();
+            
+		    privateProxy = null;
 
 			leave(false);
 			String output = "client> The other user from this private room has gone offline.\n"
@@ -173,15 +175,7 @@ public class ChatClient implements ChatClientServer, Runnable {
 	 */
 	@Override
 	public Void stopVideoStream() throws AvroRemoteException {
-		if (videoSender != null) {
-		    videoSender.stop();
-		    videoSender = null;
-		}
-		
-	    if (player != null) {
-			player.dispose();
-			player = null;
-		}
+	    closeVideo();
 		
 		return null;
 	}
@@ -286,13 +280,10 @@ public class ChatClient implements ChatClientServer, Runnable {
 			privateProxy.leave(false);
 		}
 
-		if (videoSender != null) {
-			videoSender.stop();
-			videoSender = null;
-		}
+		closeVideo();
 		
-		privateProxy = null;
         try {
+            privateProxy = null;
             privateTransceiver.close();
         } catch (IOException e) {
             // the other client is already offline
@@ -419,13 +410,10 @@ public class ChatClient implements ChatClientServer, Runnable {
 			ShellFactory.createConsoleShell("client", "", new ClientUI(this)).commandLoop();
 
 			t.interrupt();
-			
-	        if (videoSender != null) {
-	            videoSender.stop();
-	            videoSender = null;
-	        }
 	        
-	        privateProxy = null;
+			closeVideo();
+	        
+			privateProxy = null;
 
 			serverProxy.leave(username);
 			serverTransceiver.close();
@@ -521,12 +509,26 @@ public class ChatClient implements ChatClientServer, Runnable {
             System.out.println(arguments);
             out.println("write host1/rsvp.send_path " + arguments);
             System.out.println(in.readLine());
+            in.close();
             out.close();
             telnetSocket.close();
         } catch (IOException e) {
+            System.err.println("Failed to connect to click script on port 10000. Can't send RSVP PATH message.");
         }
 
         // TODO is sleep needed to allow the PATH message to reach its destination?
+	}
+	
+	private void closeVideo() {
+       if (videoSender != null) {
+            videoSender.stop();
+            videoSender = null;
+        }
+        
+        if (player != null) {
+            player.close();
+            player = null;
+        }
 	}
 
 	/***
