@@ -112,10 +112,10 @@ public class ClientUI {
 					String output = "The client has accepted your video streaming request.";
 					client.getClientProxy().sendPrivateMessage(output);
 
-					// set up videostream: sender -> receiver
+					// set up video stream: sender -> receiver
 					client.getClientProxy().setupVideoStreaming(false);
 
-					// set up videostream: receiver -> sender
+					// set up video stream: receiver -> sender
 					client.getClientProxy().setupVideoStreaming(true);
 				} else {
 					String output = "client> You don't have any video streaming requests yet.\n"
@@ -145,7 +145,7 @@ public class ClientUI {
 				System.err.println("server> Something went wrong with setting up the connection.\n"
 						+ "server> Are you sure you got a chat request from " + chatPartner + "?\n"
 						+ "server> Check if " + chatPartner + " is still online by typing 'gcl'.\n"
-						+ "server> If so try again by reaccepting with 'accept'");
+						+ "server> If so try again by reaccepting with 'accept " + chatPartner + "'");
 			}
 		} catch (AvroRemoteException e) {
 			System.err.println("server> Failed to receive answer from the server.");
