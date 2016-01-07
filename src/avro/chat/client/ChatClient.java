@@ -28,6 +28,7 @@ import xuggler.VideoSenderThread;
 public class ChatClient implements ChatClientServer, Runnable {
 	/** Fields **/
 	// Main server
+    boolean disconnectedServer;
 	String serverIP;
 	int serverPort;
 	InetSocketAddress serverSocket;
@@ -152,7 +153,7 @@ public class ChatClient implements ChatClientServer, Runnable {
 		try {
 			if (player == null) {
 				awaitingVideo = false;
-				player = new VideoImage();
+				player = new VideoImage(privateProxy);
 			}
 
 			BufferedImage image = ImageIO.read(new ByteArrayInputStream(frame.array()));
@@ -171,11 +172,16 @@ public class ChatClient implements ChatClientServer, Runnable {
 	 */
 	@Override
 	public Void stopVideoStream() throws AvroRemoteException {
-		if (player != null) {
+		if (videoSender != null) {
+		    videoSender.stop();
+		    videoSender = null;
+		}
+		
+	    if (player != null) {
 			player.dispose();
 			player = null;
 		}
-
+		
 		return null;
 	}
 
@@ -273,13 +279,13 @@ public class ChatClient implements ChatClientServer, Runnable {
 	@Override
 	public Void leave(boolean closeOtherProxy) throws AvroRemoteException {
 		if (closeOtherProxy) {
-			if (videoSender != null) {
-				videoSender.stop();
-				videoSender = null;
-			}
-			
 			privateProxy.leave(false);
-			privateProxy = null;
+
+			try {
+                privateTransceiver.close();
+            } catch (IOException e) {
+                // the other client is already offline
+            }
 		}
 
 		if (videoSender != null) {
@@ -288,7 +294,6 @@ public class ChatClient implements ChatClientServer, Runnable {
 		}
 		
 		privateProxy = null;
-		// privateTransceiver.close();
 		System.out.println(
 				"client> You have left the private chat.\n" + "client> You can 'join' a new one now if you want.");
 
@@ -387,6 +392,7 @@ public class ChatClient implements ChatClientServer, Runnable {
 
 			if (serverProxy.register(username, clientIP, clientPort)) {
 				System.out.println("You are successfully registered to the server.");
+				disconnectedServer = false;
 			} else {
 				System.out.println(
 						"Something went wrong when registering with the server." + " Maybe you've already registered.");
@@ -409,10 +415,13 @@ public class ChatClient implements ChatClientServer, Runnable {
 			ShellFactory.createConsoleShell("client", "", new ClientUI(this)).commandLoop();
 
 			t.interrupt();
-
-			if (privateProxy != null) {
-				privateProxy.leave(true);
-			}
+			
+	        if (videoSender != null) {
+	            videoSender.stop();
+	            videoSender = null;
+	        }
+	        
+	        privateProxy = null;
 
 			serverProxy.leave(username);
 			serverTransceiver.close();
@@ -437,6 +446,7 @@ public class ChatClient implements ChatClientServer, Runnable {
 						+ "client> Closing transceiver, you may try to connect to the server manually later.");
 
 				serverTransceiver.close();
+				disconnectedServer = true;
 				return;
 			} else {
 				System.err.println("client> Cannot access the server, trying to reconnect in " + n * 5 + " seconds.");
@@ -468,10 +478,12 @@ public class ChatClient implements ChatClientServer, Runnable {
 	 * Check if the server is still alive every 5 seconds.
 	 */
 	private void checkServer() throws InterruptedException {
-		try {
-			serverProxy.isAlive();
-		} catch (AvroRemoteException e) {
-			reconnect(1);
+		if (!disconnectedServer) {
+    	    try {
+    			serverProxy.isAlive();
+    		} catch (AvroRemoteException e) {
+    			reconnect(1);
+    		}
 		}
 	}
 

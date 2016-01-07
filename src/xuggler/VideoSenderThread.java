@@ -9,19 +9,23 @@ import avro.chat.proto.ChatClientServer;
 public class VideoSenderThread implements Runnable {
     private Thread t;
     ChatClientServer privateProxy;
-
+    VideoDecoder decoder;
+    
     public VideoSenderThread(ChatClientServer proxy) {
         privateProxy = proxy;
+        decoder = new VideoDecoder();
+        decoder.updateProxy(proxy);
     }
 
     @Override
     public void run() {
-        (new VideoDecoder()).start(privateProxy);
+        decoder.start();
         
         try {
 			privateProxy.stopVideoStream();
+			System.out.println("client> The video stream has ended.");
 		} catch (AvroRemoteException e) {
-			System.err.println("VideoSenderThread: bad private proxy");
+		    // other client is already offline
 		}
     }
 
@@ -40,6 +44,7 @@ public class VideoSenderThread implements Runnable {
      * Interrupts the thread.
      */
     public void stop() {
+        decoder.updateProxy(null);
         t.interrupt();
     }
 }

@@ -69,8 +69,7 @@ public class VideoImage extends JFrame {
                 try {
                     privateProxy.stopVideoStream();
                 } catch (AvroRemoteException e1) {
-                    System.err.println("VideoImage bad private proxy");
-                    e1.printStackTrace();
+                    // the other client is already offline
                 }
             }
         });

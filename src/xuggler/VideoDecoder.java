@@ -31,9 +31,11 @@ public class VideoDecoder {
 			* SECONDS_BETWEEN_FRAMES);
 	public static ChatClientServer privateProxy;
 
-	public void start(ChatClientServer proxy) {
-		privateProxy = proxy;
-
+	public void updateProxy(ChatClientServer proxy) {
+	    privateProxy = proxy;
+	}
+	
+	public void start() {
 		IMediaReader mediaReader = ToolFactory.makeReader(inputFilename);
 
 		// stipulate that we want BufferedImages created in BGR 24bit color
@@ -45,6 +47,9 @@ public class VideoDecoder {
 		// read out the contents of the media file and
 		// dispatch events to the attached listener
 		while (mediaReader.readPacket() == null) {
+		    if (privateProxy == null) {
+		        break;
+		    }
 		}
 	}
 
@@ -58,7 +63,7 @@ public class VideoDecoder {
 
 			// if it's time to write the next frame
 			if (event.getTimeStamp() - mLastPtsWrite >= MICRO_SECONDS_BETWEEN_FRAMES) {
-				sendImageToOutputStream(event.getImage());
+			    sendImageToOutputStream(event.getImage());
 
 				// update last write time
 				mLastPtsWrite += MICRO_SECONDS_BETWEEN_FRAMES;
@@ -67,22 +72,23 @@ public class VideoDecoder {
 		}
 
 		private void sendImageToOutputStream(BufferedImage image) {
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		    ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			try {
 				ImageIO.write(image, "png", baos);
 				baos.flush();
 				ByteBuffer frame = ByteBuffer.wrap(baos.toByteArray());
-				privateProxy.incomingFrame(frame);
 
+				if (privateProxy != null) {
+				    privateProxy.incomingFrame(frame);
+				}
+				
 				Thread.sleep(40);
 			} catch (AvroRemoteException e) {
-				System.err.println("VideoDecoder: bad private proxy");
+			    privateProxy = null;
 			} catch (IOException e) {
 				e.printStackTrace();
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
+            }
+	    }
 	}
 }
