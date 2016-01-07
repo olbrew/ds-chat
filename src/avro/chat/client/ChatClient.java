@@ -1,11 +1,15 @@
 package avro.chat.client;
 
 import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.nio.ByteBuffer;
 
 import javax.imageio.ImageIO;
@@ -44,6 +48,8 @@ public class ChatClient implements ChatClientServer, Runnable {
 	ChatClientServer clientProxy;
 
 	// Other client connected to us
+	String privateIP;
+	int privatePort;
 	Transceiver privateTransceiver;
 	ChatClientServer privateProxy;
 
@@ -223,6 +229,8 @@ public class ChatClient implements ChatClientServer, Runnable {
 	@Override
 	public Void setupVideoStreaming(boolean privateProxy) throws AvroRemoteException {
 		if (privateProxy) { // Sender
+            sendRsvpPathMessage();
+		    
 			videoSender = new VideoSenderThread(this.privateProxy);
 			videoSender.start();
 		} else { // Receiver
@@ -246,8 +254,8 @@ public class ChatClient implements ChatClientServer, Runnable {
 	 */
 	@Override
 	public boolean register(String username, String privateAddress) throws AvroRemoteException {
-		String privateIP = ((privateAddress.split(":"))[0]).substring(1);
-		int privatePort = Integer.parseInt((privateAddress.split(":"))[1]);
+		privateIP = ((privateAddress.split(":"))[0]).substring(1);
+		privatePort = Integer.parseInt((privateAddress.split(":"))[1]);
 
 		try {
 			privateTransceiver = new SaslSocketTransceiver(
@@ -492,6 +500,33 @@ public class ChatClient implements ChatClientServer, Runnable {
 		} catch (AvroRemoteException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	/***
+     * Telnets to the running click script and triggers a handler to send RSVP PATH msg.
+     */
+	private void sendRsvpPathMessage() {
+        Socket telnetSocket = null;
+        PrintWriter out = null;
+        BufferedReader in = null;
+        
+        try {
+            // TODO determine correct hostname
+            telnetSocket = new Socket("localhost", 10000);
+            out = new PrintWriter(telnetSocket.getOutputStream(), true);
+            in = new BufferedReader(new InputStreamReader(telnetSocket.getInputStream()));
+            // TODO fix clientPort, it's always 0 for some reason, even though configure() reads it correct in
+            String arguments = "SRC " + clientIP + ", SRCPORT " + clientPort
+                    + ", DST " + privateIP + ", DSTPORT " + privatePort;
+            System.out.println(arguments);
+            out.println("write host1/rsvp.send_path " + arguments);
+            System.out.println(in.readLine());
+            out.close();
+            telnetSocket.close();
+        } catch (IOException e) {
+        }
+
+        // TODO is sleep needed to allow the PATH message to reach its destination?
 	}
 
 	/***
