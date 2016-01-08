@@ -32,9 +32,9 @@ public class VideoDecoder {
 	public static ChatClientServer privateProxy;
 
 	public void updateProxy(ChatClientServer proxy) {
-	    privateProxy = proxy;
+		privateProxy = proxy;
 	}
-	
+
 	public void start() {
 		IMediaReader mediaReader = ToolFactory.makeReader(inputFilename);
 
@@ -47,9 +47,9 @@ public class VideoDecoder {
 		// read out the contents of the media file and
 		// dispatch events to the attached listener
 		while (mediaReader.readPacket() == null) {
-		    if (privateProxy == null) {
-		        break;
-		    }
+			if (privateProxy == null) {
+				break;
+			}
 		}
 	}
 
@@ -63,7 +63,7 @@ public class VideoDecoder {
 
 			// if it's time to write the next frame
 			if (event.getTimeStamp() - mLastPtsWrite >= MICRO_SECONDS_BETWEEN_FRAMES) {
-			    sendImageToOutputStream(event.getImage());
+				sendImageToOutputStream(event.getImage());
 
 				// update last write time
 				mLastPtsWrite += MICRO_SECONDS_BETWEEN_FRAMES;
@@ -72,24 +72,24 @@ public class VideoDecoder {
 		}
 
 		private void sendImageToOutputStream(BufferedImage image) {
-		    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			try {
 				ImageIO.write(image, "jpg", baos);
 				baos.flush();
 				ByteBuffer frame = ByteBuffer.wrap(baos.toByteArray());
 
 				if (privateProxy != null) {
-				    privateProxy.incomingFrame(frame);
+					privateProxy.incomingFrame(frame);
 				}
-				
-				Thread.sleep(1000/20);
+
+				Thread.sleep(1000 / 20);
 			} catch (AvroRemoteException e) {
-			    privateProxy = null;
+				privateProxy = null;
 			} catch (IOException e) {
 				e.printStackTrace();
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-	    }
+		}
 	}
 }

@@ -32,7 +32,7 @@ import xuggler.VideoSenderThread;
 public class ChatClient implements ChatClientServer, Runnable {
 	/** Fields **/
 	// Main server
-    boolean disconnectedServer;
+	boolean disconnectedServer;
 	String serverIP;
 	int serverPort;
 	InetSocketAddress serverSocket;
@@ -114,9 +114,9 @@ public class ChatClient implements ChatClientServer, Runnable {
 				return false;
 			}
 		} catch (AvroRemoteException e) {
-            closeVideo();
-            
-		    privateProxy = null;
+			closeVideo();
+
+			privateProxy = null;
 
 			leave(false);
 			String output = "client> The other user from this private room has gone offline.\n"
@@ -175,9 +175,9 @@ public class ChatClient implements ChatClientServer, Runnable {
 	 */
 	@Override
 	public Void stopVideoStream() throws AvroRemoteException {
-	    closeVideo();
+		closeVideo();
 		privateProxy.sendRsvpPathTearMessage();
-		
+
 		return null;
 	}
 
@@ -224,14 +224,14 @@ public class ChatClient implements ChatClientServer, Runnable {
 	@Override
 	public Void setupVideoStreaming(boolean privateProxy) throws AvroRemoteException {
 		if (privateProxy) { // Sender
-            sendRsvpPathMessage();
-		    
+			sendRsvpPathMessage();
+
 			videoSender = new VideoSenderThread(this.privateProxy);
 			videoSender.start();
 		} else { // Receiver
 			this.privateProxy.setupVideoStreaming(true);
 		}
-		
+
 		return null;
 	}
 
@@ -282,14 +282,14 @@ public class ChatClient implements ChatClientServer, Runnable {
 		}
 
 		closeVideo();
-		
-        try {
-            privateProxy = null;
-            privateTransceiver.close();
-        } catch (IOException e) {
-            // the other client is already offline
-        }
-        
+
+		try {
+			privateProxy = null;
+			privateTransceiver.close();
+		} catch (IOException e) {
+			// the other client is already offline
+		}
+
 		System.out.println(
 				"client> You have left the private chat.\n" + "client> You can 'join' a new one now if you want.");
 
@@ -411,9 +411,9 @@ public class ChatClient implements ChatClientServer, Runnable {
 			ShellFactory.createConsoleShell("client", "", new ClientUI(this)).commandLoop();
 
 			t.interrupt();
-	        
+
 			closeVideo();
-	        
+
 			privateProxy = null;
 
 			serverProxy.leave(username);
@@ -472,11 +472,11 @@ public class ChatClient implements ChatClientServer, Runnable {
 	 */
 	private void checkServer() throws InterruptedException {
 		if (!disconnectedServer) {
-    	    try {
-    			serverProxy.isAlive();
-    		} catch (AvroRemoteException e) {
-    			reconnect(1);
-    		}
+			try {
+				serverProxy.isAlive();
+			} catch (AvroRemoteException e) {
+				reconnect(1);
+			}
 		}
 	}
 
@@ -490,76 +490,78 @@ public class ChatClient implements ChatClientServer, Runnable {
 			e.printStackTrace();
 		}
 	}
-	
+
 	/***
-     * Connects to the running click script and triggers a handler to send RSVP PATH msg.
-     */
+	 * Connects to the running click script and triggers a handler to send RSVP
+	 * PATH msg.
+	 */
 	private void sendRsvpPathMessage() {
-        try {
-        	Socket rsvpSocket = new Socket(clientIP, 10000);
-        	PrintWriter out = new PrintWriter(rsvpSocket.getOutputStream(), true);
-        	BufferedReader in = new BufferedReader(new InputStreamReader(rsvpSocket.getInputStream()));
+		try {
+			Socket rsvpSocket = new Socket(clientIP, 10000);
+			PrintWriter out = new PrintWriter(rsvpSocket.getOutputStream(), true);
+			BufferedReader in = new BufferedReader(new InputStreamReader(rsvpSocket.getInputStream()));
 
-            String arguments = "SRC " + clientIP + ", SRCPORT " + clientPort
-                    + ", DST " + privateIP + ", DSTPORT " + privatePort;
-            System.out.println(arguments);
-            
-            if (clientIP.equals(serverIP)) {
-            	out.println("write host2/rsvp_generator.send_path " + arguments);	
-            } else {
-            	out.println("write host1/rsvp_generator.send_path " + arguments);
-            }
+			String arguments = "SRC " + clientIP + ", SRCPORT " + clientPort + ", DST " + privateIP + ", DSTPORT "
+					+ privatePort;
+			System.out.println(arguments);
 
-            System.out.println(in.readLine());
-            in.close();
-            out.close();
-            rsvpSocket.close();
-            
-            Thread.sleep(1000);
-        } catch (IOException e) {
-            System.err.println("Failed to connect to click script on port 10000. Can't send RSVP PATH message.");
-        } catch (InterruptedException e) {
+			if (clientIP.equals(serverIP)) {
+				out.println("write host2/rsvp_generator.send_path " + arguments);
+			} else {
+				out.println("write host1/rsvp_generator.send_path " + arguments);
+			}
+
+			System.out.println(in.readLine());
+			in.close();
+			out.close();
+			rsvpSocket.close();
+
+			Thread.sleep(1000);
+		} catch (IOException e) {
+			System.err.println("Failed to connect to click script on port 10000. Can't send RSVP PATH message.");
+		} catch (InterruptedException e) {
 		}
 	}
-	
+
 	/***
-     * Connects to the running click script and triggers a handler to send RSVP PATH TEAR msg.
-     */
+	 * Connects to the running click script and triggers a handler to send RSVP
+	 * PATH TEAR msg.
+	 */
 	@Override
 	public Void sendRsvpPathTearMessage() {
-        try {
-        	Socket rsvpSocket = new Socket(clientIP, 10000);
-        	PrintWriter out = new PrintWriter(rsvpSocket.getOutputStream(), true);
-        	BufferedReader in = new BufferedReader(new InputStreamReader(rsvpSocket.getInputStream()));
+		try {
+			Socket rsvpSocket = new Socket(clientIP, 10000);
+			PrintWriter out = new PrintWriter(rsvpSocket.getOutputStream(), true);
+			BufferedReader in = new BufferedReader(new InputStreamReader(rsvpSocket.getInputStream()));
 
-            String arguments = "SRC " + clientIP + ", SRCPORT " + clientPort
-                    + ", DST " + privateIP + ", DSTPORT " + privatePort;
-            System.out.println(arguments);
-            
-            System.out.println(in.readLine());
-            in.close();
-            out.close();
-            rsvpSocket.close();
-            
-            Thread.sleep(1000);
-        } catch (IOException e) {
-            System.err.println("Failed to connect to click script on port 10000. Can't send RSVP PATH message.");
-        } catch (InterruptedException e) {
+			String arguments = "SRC " + clientIP + ", SRCPORT " + clientPort + ", DST " + privateIP + ", DSTPORT "
+					+ privatePort;
+			System.out.println(arguments);
+
+			System.out.println(in.readLine());
+			in.close();
+			out.close();
+			rsvpSocket.close();
+
+			Thread.sleep(1000);
+		} catch (IOException e) {
+			System.err.println("Failed to connect to click script on port 10000. Can't send RSVP PATH message.");
+		} catch (InterruptedException e) {
 		}
-        
-        return null;
+
+		return null;
 	}
-	
+
 	private void closeVideo() {
-       if (videoSender != null) {
-            videoSender.stop();
-            videoSender = null;
-        }
-        
-        if (player != null) {
-            player.close();
-            player = null;
-        }
+		if (videoSender != null) {
+			videoSender.stop();
+			videoSender = null;
+		}
+
+		if (player != null) {
+			player.close();
+			player = null;
+		}
 	}
 
 	/***

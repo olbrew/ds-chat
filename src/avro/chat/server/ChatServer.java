@@ -53,30 +53,24 @@ public class ChatServer implements Chat, Runnable {
 	 * @throws AvroRemoteException
 	 */
 	@Override
-	public boolean register(String username, String clientIP,
-			int clientServerPort) throws AvroRemoteException {
+	public boolean register(String username, String clientIP, int clientServerPort) throws AvroRemoteException {
 		try {
 			Transceiver transceiver = new SaslSocketTransceiver(
-					new InetSocketAddress(InetAddress.getByName(clientIP),
-							clientServerPort));
-			ChatClientServer proxy = (ChatClientServer) SpecificRequestor
-					.getClient(ChatClientServer.class, transceiver);
+					new InetSocketAddress(InetAddress.getByName(clientIP), clientServerPort));
+			ChatClientServer proxy = (ChatClientServer) SpecificRequestor.getClient(ChatClientServer.class,
+					transceiver);
 
 			if (!clients.containsKey(username)) {
 				clients.put(username, transceiver);
 				clientsServer.put(username, proxy);
-				System.out.println(
-						"server> Registered client with username: " + username);
+				System.out.println("server> Registered client with username: " + username);
 				return true;
 			} else {
-				System.err.println("server> " + username
-						+ " is already registered with the server.");
+				System.err.println("server> " + username + " is already registered with the server.");
 				return false;
 			}
 		} catch (IOException e1) {
-			System.err
-					.println("server> Couldn't connect back to the client on: "
-							+ clientIP + ":" + clientServerPort);
+			System.err.println("server> Couldn't connect back to the client on: " + clientIP + ":" + clientServerPort);
 			return false;
 		}
 	}
@@ -110,41 +104,34 @@ public class ChatServer implements Chat, Runnable {
 	 * @throws AvroRemoteException
 	 */
 	@Override
-	public String join(String username, String roomName)
-			throws AvroRemoteException {
+	public String join(String username, String roomName) throws AvroRemoteException {
 		String output;
 		if (username.equals(roomName)) {
-			output = "server> You can just talk to yourself, "
-					+ "you don't need our chat for that ;)";
+			output = "server> You can just talk to yourself, " + "you don't need our chat for that ;)";
 			return output;
 		}
 		if (roomName.equals("Public")) { // Public chat
 			if (publicRoom.join(username)) {
-				output = "server> " + username
-						+ " has successfully joined the Public chat room.";
+				output = "server> " + username + " has successfully joined the Public chat room.";
 				System.out.println(output);
 				return output;
 			} else {
-				output = "server> " + username
-						+ " is already in the public room.";
+				output = "server> " + username + " is already in the public room.";
 				System.err.println(output);
 				return output;
 			}
 		} else { // Private Chat
 			if (clients.containsKey(roomName)) {
 				pendingRequests.put(username, roomName);
-				clientsServer.get(roomName)
-						.incomingMessage("server> " + username
-								+ " would like to start a private conversation with you.\n"
+				clientsServer.get(roomName).incomingMessage(
+						"server> " + username + " would like to start a private conversation with you.\n"
 								+ "server> You will be disconnected from all your current chats if you accept.\n"
-								+ "server> Type \"accept '" + username
-								+ "'\" when you want to start.");
+								+ "server> Type \"accept '" + username + "'\" when you want to start.");
 				output = "server> A request was sent to " + roomName
 						+ ".\nserver> When he accepts your existing chats will be closed.";
 				return output;
 			} else {
-				output = "server> " + roomName
-						+ " is not connected to the server right now.\n"
+				output = "server> " + roomName + " is not connected to the server right now.\n"
 						+ "server> Type 'gcl' to see currently connected clients.";
 				System.err.println(output);
 				return output;
@@ -167,12 +154,10 @@ public class ChatServer implements Chat, Runnable {
 		if (publicRoom.contains(userName)) {
 			publicRoom.leave(userName);
 			if (!publicRoom.contains(userName)) {
-				System.out.println("server> " + userName
-						+ " has left the Public chat room.");
+				System.out.println("server> " + userName + " has left the Public chat room.");
 				return true;
 			} else {
-				System.err.println("server> " + userName
-						+ " couldn't leave the Public chat room.");
+				System.err.println("server> " + userName + " couldn't leave the Public chat room.");
 				return false;
 			}
 		} else {
@@ -207,8 +192,7 @@ public class ChatServer implements Chat, Runnable {
 	 * @throws AvroRemoteException
 	 */
 	@Override
-	public String sendMessage(String userName, String message)
-			throws AvroRemoteException {
+	public String sendMessage(String userName, String message) throws AvroRemoteException {
 		if (!publicRoom.contains(userName)) {
 			String error = "server> You have not joined a chatroom yet.\n"
 					+ "server> To join type: \"join 'Public'\" to join the public chatroom.\n"
@@ -243,12 +227,10 @@ public class ChatServer implements Chat, Runnable {
 	 * @throws AvroRemoteException
 	 */
 	@Override
-	public boolean setupConnection(String client1, String client2)
-			throws AvroRemoteException {
+	public boolean setupConnection(String client1, String client2) throws AvroRemoteException {
 		if (pendingRequests.containsKey(client1)) {
 			if ((pendingRequests.get(client1)).equals(client2)) {
-				clientsServer.get(client1).incomingMessage("server> " + client2
-						+ " has accepted your connection."
+				clientsServer.get(client1).incomingMessage("server> " + client2 + " has accepted your connection."
 						+ "\nserver> Your existing chats will now be closed and a private connection will be made.");
 
 				if (publicRoom.contains(client1)) {
@@ -259,25 +241,18 @@ public class ChatServer implements Chat, Runnable {
 				}
 
 				try {
-					System.out.println("server> Setting up connections between "
-							+ client1 + " and " + client2);
-					String client1Address = (clients.get(client1))
-							.getRemoteName();
-					String client2Address = (clients.get(client2))
-							.getRemoteName();
-					if (((clientsServer.get(client1)).register(client2,
-							client2Address))
-							&& ((clientsServer.get(client2)).register(client1,
-									client1Address))) {
-						System.out.println(
-								"server> Connection succesfully made between "
-										+ client1 + " and " + client2);
+					System.out.println("server> Setting up connections between " + client1 + " and " + client2);
+					String client1Address = (clients.get(client1)).getRemoteName();
+					String client2Address = (clients.get(client2)).getRemoteName();
+					if (((clientsServer.get(client1)).register(client2, client2Address))
+							&& ((clientsServer.get(client2)).register(client1, client1Address))) {
+						System.out
+								.println("server> Connection succesfully made between " + client1 + " and " + client2);
 						pendingRequests.remove(client1);
 						return true;
 					} else {
-						System.err.println(
-								"server> Something went wrong with setting up connections between "
-										+ client1 + " and " + client2);
+						System.err.println("server> Something went wrong with setting up connections between " + client1
+								+ " and " + client2);
 						return false;
 					}
 				} catch (IOException e) {
@@ -299,15 +274,13 @@ public class ChatServer implements Chat, Runnable {
 	 * @throws AvroRemoteException
 	 */
 	private void checkUsers() throws AvroRemoteException {
-		Hashtable<String, Transceiver> clientsCopy = new Hashtable<String, Transceiver>(
-				clients);
+		Hashtable<String, Transceiver> clientsCopy = new Hashtable<String, Transceiver>(clients);
 
 		for (String client : clientsCopy.keySet()) {
 			try {
 				clientsServer.get(client).isAlive();
 			} catch (AvroRemoteException e) {
-				System.out.println("server> Failed to reconnect to " + client
-						+ ", dropping connection.");
+				System.out.println("server> Failed to reconnect to " + client + ", dropping connection.");
 				exit(client);
 			}
 		}
@@ -347,13 +320,11 @@ public class ChatServer implements Chat, Runnable {
 		if (args.length == 1) {
 			serverPort = Integer.parseInt(args[0]);
 		} else if (args.length > 1) {
-			System.err.println(
-					"ERROR: Max. 1 arguments ([server port]) expected.");
+			System.err.println("ERROR: Max. 1 arguments ([server port]) expected.");
 		}
 
 		try {
-			server = new SaslSocketServer(new SpecificResponder(Chat.class, cs),
-					new InetSocketAddress(serverPort));
+			server = new SaslSocketServer(new SpecificResponder(Chat.class, cs), new InetSocketAddress(serverPort));
 			server.start();
 
 			Thread t = new Thread(cs);
@@ -362,8 +333,7 @@ public class ChatServer implements Chat, Runnable {
 			server.join();
 			server.close();
 		} catch (IOException e) {
-			System.err.println(
-					"ERROR: Starting server. Double check server-ip and server-port.");
+			System.err.println("ERROR: Starting server. Double check server-ip and server-port.");
 			System.exit(1);
 		} catch (InterruptedException e) {
 			e.printStackTrace();

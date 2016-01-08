@@ -34,91 +34,80 @@ import org.apache.avro.AvroRemoteException;
 
 import avro.chat.proto.ChatClientServer;
 
-/**
- * This class just displays a 2d graphic on a Swing window. It's only here so
- * the video playback demos look simpler. Please don't reuse this component;
- * why? Because I know next to nothing about Swing, and this is probably busted.
- * <p>
- * Of note though, is this class has NO XUGGLER dependencies.
- * </p>
- * 
- * @author aclarke
- *
- */
 @SuppressWarnings("serial")
 public class VideoImage extends JFrame {
-    private final ImageComponent mOnscreenPicture;
-    private ChatClientServer privateProxy;
+	private final ImageComponent mOnscreenPicture;
+	private ChatClientServer privateProxy;
 
-    public VideoImage(ChatClientServer proxy) {
-        super("Video stream.");
-        privateProxy = proxy;
-        mOnscreenPicture = new ImageComponent();
-        this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-        getContentPane().add(mOnscreenPicture);
-        this.setVisible(true);
-        this.pack();
+	public VideoImage(ChatClientServer proxy) {
+		super("Video stream.");
+		privateProxy = proxy;
+		mOnscreenPicture = new ImageComponent();
+		this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+		getContentPane().add(mOnscreenPicture);
+		this.setVisible(true);
+		this.pack();
 
-        this.addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosing(WindowEvent e) {
-                close();
-                
-                try {
-                    privateProxy.stopVideoStream();
-                } catch (AvroRemoteException e1) {
-                    // the other client is already offline
-                }
-            }
-        });
-    }
+		this.addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosing(WindowEvent e) {
+				close();
 
-    public void setImage(final BufferedImage image) {
-        mOnscreenPicture.setImage(image);
-    }
-    
-    public void close() {
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setVisible(false);
-        dispose();
-    }
+				try {
+					privateProxy.stopVideoStream();
+				} catch (AvroRemoteException e1) {
+					// the other client is already offline
+				}
+			}
+		});
+	}
 
-    public class ImageComponent extends JComponent {
-        private Image mImage;
-        private Dimension mSize;
+	public void setImage(final BufferedImage image) {
+		mOnscreenPicture.setImage(image);
+	}
 
-        public void setImage(Image image) {
-            SwingUtilities.invokeLater(new ImageRunnable(image));
-        }
+	public void close() {
+		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		setVisible(false);
+		dispose();
+	}
 
-        private class ImageRunnable implements Runnable {
-            private final Image newImage;
+	public class ImageComponent extends JComponent {
+		private Image mImage;
+		private Dimension mSize;
 
-            public ImageRunnable(Image newImage) {
-                super();
-                this.newImage = newImage;
-            }
+		public void setImage(Image image) {
+			SwingUtilities.invokeLater(new ImageRunnable(image));
+		}
 
-            public void run() {
-                ImageComponent.this.mImage = newImage;
-                final Dimension newSize = new Dimension(mImage.getWidth(null), mImage.getHeight(null));
-                if (!newSize.equals(mSize)) {
-                    ImageComponent.this.mSize = newSize;
-                    VideoImage.this.setSize(mImage.getWidth(null), mImage.getHeight(null));
-                    VideoImage.this.setVisible(true);
-                }
-                repaint();
-            }
-        }
+		private class ImageRunnable implements Runnable {
+			private final Image newImage;
 
-        public ImageComponent() {
-            mSize = new Dimension(0, 0);
-            setSize(mSize);
-        }
+			public ImageRunnable(Image newImage) {
+				super();
+				this.newImage = newImage;
+			}
 
-        public synchronized void paint(Graphics g) {
-            if (mImage != null)
-                g.drawImage(mImage, 0, 0, this);
-        }
-    }
+			public void run() {
+				ImageComponent.this.mImage = newImage;
+				final Dimension newSize = new Dimension(mImage.getWidth(null), mImage.getHeight(null));
+				if (!newSize.equals(mSize)) {
+					ImageComponent.this.mSize = newSize;
+					VideoImage.this.setSize(mImage.getWidth(null), mImage.getHeight(null));
+					VideoImage.this.setVisible(true);
+				}
+				repaint();
+			}
+		}
+
+		public ImageComponent() {
+			mSize = new Dimension(0, 0);
+			setSize(mSize);
+		}
+
+		public synchronized void paint(Graphics g) {
+			if (mImage != null)
+				g.drawImage(mImage, 0, 0, this);
+		}
+	}
 }
