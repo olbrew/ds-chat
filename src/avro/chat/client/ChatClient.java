@@ -176,6 +176,7 @@ public class ChatClient implements ChatClientServer, Runnable {
 	@Override
 	public Void stopVideoStream() throws AvroRemoteException {
 	    closeVideo();
+		privateProxy.sendRsvpPathTearMessage();
 		
 		return null;
 	}
@@ -491,32 +492,62 @@ public class ChatClient implements ChatClientServer, Runnable {
 	}
 	
 	/***
-     * Telnets to the running click script and triggers a handler to send RSVP PATH msg.
+     * Connects to the running click script and triggers a handler to send RSVP PATH msg.
      */
 	private void sendRsvpPathMessage() {
-        Socket telnetSocket = null;
-        PrintWriter out = null;
-        BufferedReader in = null;
-        
         try {
-            // TODO determine correct hostname
-            telnetSocket = new Socket("localhost", 10000);
-            out = new PrintWriter(telnetSocket.getOutputStream(), true);
-            in = new BufferedReader(new InputStreamReader(telnetSocket.getInputStream()));
-            // TODO fix clientPort, it's always 0 for some reason, even though configure() reads it correct in
+        	Socket rsvpSocket = new Socket(clientIP, 10000);
+        	PrintWriter out = new PrintWriter(rsvpSocket.getOutputStream(), true);
+        	BufferedReader in = new BufferedReader(new InputStreamReader(rsvpSocket.getInputStream()));
+
             String arguments = "SRC " + clientIP + ", SRCPORT " + clientPort
                     + ", DST " + privateIP + ", DSTPORT " + privatePort;
             System.out.println(arguments);
-            out.println("write host1/rsvp.send_path " + arguments);
+            
+            if (clientIP.equals(serverIP)) {
+            	out.println("write host2/rsvp_generator.send_path " + arguments);	
+            } else {
+            	out.println("write host1/rsvp_generator.send_path " + arguments);
+            }
+
             System.out.println(in.readLine());
             in.close();
             out.close();
-            telnetSocket.close();
+            rsvpSocket.close();
+            
+            Thread.sleep(1000);
         } catch (IOException e) {
             System.err.println("Failed to connect to click script on port 10000. Can't send RSVP PATH message.");
-        }
+        } catch (InterruptedException e) {
+		}
+	}
+	
+	/***
+     * Connects to the running click script and triggers a handler to send RSVP PATH TEAR msg.
+     */
+	@Override
+	public Void sendRsvpPathTearMessage() {
+        try {
+        	Socket rsvpSocket = new Socket(clientIP, 10000);
+        	PrintWriter out = new PrintWriter(rsvpSocket.getOutputStream(), true);
+        	BufferedReader in = new BufferedReader(new InputStreamReader(rsvpSocket.getInputStream()));
 
-        // TODO is sleep needed to allow the PATH message to reach its destination?
+            String arguments = "SRC " + clientIP + ", SRCPORT " + clientPort
+                    + ", DST " + privateIP + ", DSTPORT " + privatePort;
+            System.out.println(arguments);
+            
+            System.out.println(in.readLine());
+            in.close();
+            out.close();
+            rsvpSocket.close();
+            
+            Thread.sleep(1000);
+        } catch (IOException e) {
+            System.err.println("Failed to connect to click script on port 10000. Can't send RSVP PATH message.");
+        } catch (InterruptedException e) {
+		}
+        
+        return null;
 	}
 	
 	private void closeVideo() {

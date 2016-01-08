@@ -26,7 +26,7 @@ public class VideoDecoder {
 	// Time of last frame write
 	private static long mLastPtsWrite = Global.NO_PTS;
 	private static final String inputFilename = "./resources/videos/BigBuckBunny.mp4";
-	public static final double SECONDS_BETWEEN_FRAMES = 1.0 / 24.0;
+	public static final double SECONDS_BETWEEN_FRAMES = 1.0 / 20.0;
 	public static final long MICRO_SECONDS_BETWEEN_FRAMES = (long) (Global.DEFAULT_PTS_PER_SECOND
 			* SECONDS_BETWEEN_FRAMES);
 	public static ChatClientServer privateProxy;
@@ -74,7 +74,7 @@ public class VideoDecoder {
 		private void sendImageToOutputStream(BufferedImage image) {
 		    ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			try {
-				ImageIO.write(image, "png", baos);
+				ImageIO.write(image, "jpg", baos);
 				baos.flush();
 				ByteBuffer frame = ByteBuffer.wrap(baos.toByteArray());
 
@@ -82,13 +82,14 @@ public class VideoDecoder {
 				    privateProxy.incomingFrame(frame);
 				}
 				
-				Thread.sleep(40);
+				Thread.sleep(1000/20);
 			} catch (AvroRemoteException e) {
 			    privateProxy = null;
 			} catch (IOException e) {
 				e.printStackTrace();
 			} catch (InterruptedException e) {
-            }
+				e.printStackTrace();
+			}
 	    }
 	}
 }

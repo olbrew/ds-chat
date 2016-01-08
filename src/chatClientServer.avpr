@@ -46,6 +46,10 @@
     "leave" : {
       "request" : [{ "name" : "closeOtherProxy", "type" : "boolean"}],
       "response" : "null"
+    },
+    "sendRsvpPathTearMessage" : {
+      "request" : [],
+      "response" : "null"
     }
   }
 }

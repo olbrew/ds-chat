@@ -8,6 +8,6 @@
 </listAttribute>
 <booleanAttribute key="org.eclipse.jdt.launching.ATTR_USE_START_ON_FIRST_THREAD" value="true"/>
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="avro.chat.client.ChatClient"/>
-<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="Eduard&#10;11000"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="Eduard&#10;192.168.11.1&#10;10010&#10;192.168.10.1&#10;11000"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="Avro"/>
 </launchConfiguration>

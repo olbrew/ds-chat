@@ -108,7 +108,6 @@ public class ClientUI {
 		try {
 			if (client.getClientProxy().inPrivateRoom()) {
 				if (client.getClientProxy().isAwaitingVideo()) {
-					// TODO trigger rsvp.send_path handler
 					String output = "The client has accepted your video streaming request.";
 					client.getClientProxy().sendPrivateMessage(output);
 
