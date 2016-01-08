@@ -545,7 +545,8 @@ public class ChatClient implements ChatClientServer, Runnable {
 
 			Thread.sleep(1000);
 		} catch (IOException e) {
-			System.err.println("Failed to connect to click script on port 10000. Can't send RSVP PATH message.");
+			System.err
+					.println("Failed to connect to click script on port 10000. Can't send RSVP PATH TEARDOWN message.");
 		} catch (InterruptedException e) {
 		}
 

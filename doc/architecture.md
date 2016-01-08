@@ -67,7 +67,13 @@ both clients will halt sending further frames.
 
 Integration with RSVP Click Project
 -----------------------------------
-<!--- TODO -->
+The sender connects to running ipnetwork.click script on port 10000
+through a new socket right after the receiver accepts the video request.
+The sender will then call our rsvp handler to reserve a path to the receiver.
+Sender's thread  will then sleep for a second before decoding and sending the
+video frames to the private client to allow the RSVP PATH message to
+arrive at the receiver. Once the video is finished, the sender will again
+connect to the same click script and trigger our RSVP path teardown handler.
 
 General
 -------
